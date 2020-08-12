@@ -19,7 +19,7 @@ my %lang = map {$_ => 1} (
 "ar", "ast", "bg", "be", "ca", "ca\@valencia", "cs", "da", "de", "el", "en_AU", "en_GB",
 "es", "et", "fa", "fi", "fr", "gl", "hu", "id", "is",
 "it", "ja", "ko", "km", "lt", "mr", "nb", "nl", "pl", "pt", "pt_BR", "ru", "sk",
-"sv", "uk", "vi", "zh_CN", "zh_TW"
+"sr\@latin", "sv", "uk", "vi", "zh_CN", "zh_TW"
 );
 
 my $revision = '$Revision$';
