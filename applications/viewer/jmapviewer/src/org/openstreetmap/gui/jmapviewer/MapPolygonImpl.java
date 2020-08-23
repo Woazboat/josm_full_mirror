@@ -19,7 +19,7 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon;
 
 public class MapPolygonImpl extends MapObjectImpl implements MapPolygon {
 
-    private List<? extends ICoordinate> points;
+    private final List<? extends ICoordinate> points;
 
     public MapPolygonImpl(ICoordinate... points) {
         this(null, null, points);

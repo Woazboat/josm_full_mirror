@@ -21,8 +21,8 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 public class MapMarkerCircle extends MapObjectImpl implements MapMarker {
 
     private Coordinate coord;
-    private double radius;
-    private STYLE markerStyle;
+    private final double radius;
+    private final STYLE markerStyle;
 
     /**
      * Constructs a new {@code MapMarkerCircle}.

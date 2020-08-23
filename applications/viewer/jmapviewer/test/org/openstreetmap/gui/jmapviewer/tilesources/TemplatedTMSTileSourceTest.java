@@ -33,7 +33,7 @@ public class TemplatedTMSTileSourceTest {
      *  * expected tile url for zoom=1, x=2, y=3
      *  * expected tile url for zoom=3, x=2, y=1
      */
-    private Collection<String[]> TEST_DATA = Arrays.asList(new String[][] {
+    private final Collection<String[]> TEST_DATA = Arrays.asList(new String[][] {
         /*
          * generate with main method below once TMS_IMAGERIES is filled in
          */

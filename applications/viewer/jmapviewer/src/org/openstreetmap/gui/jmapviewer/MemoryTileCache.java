@@ -124,7 +124,7 @@ public class MemoryTileCache implements TileCache {
      * {@link #next} and {@link #prev} item in the list.
      */
     protected static class CacheEntry {
-        private Tile tile;
+        private final Tile tile;
         private CacheEntry next;
         private CacheEntry prev;
 

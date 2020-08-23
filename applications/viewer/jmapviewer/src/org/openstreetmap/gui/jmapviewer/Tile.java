@@ -90,7 +90,7 @@ public class Tile {
 
     private static class CachedCallable<V> implements Callable<V> {
         private V result;
-        private Callable<V> callable;
+        private final Callable<V> callable;
 
         /**
          * Wraps callable so it is evaluated only once

@@ -27,10 +27,10 @@ public class JMapViewerTree extends JPanel {
     /** Serial Version UID */
     private static final long serialVersionUID = 3050203054402323972L;
 
-    private JMapViewer map;
-    private CheckBoxTree tree;
-    private JPanel treePanel;
-    private JSplitPane splitPane;
+    private final JMapViewer map;
+    private final CheckBoxTree tree;
+    private final JPanel treePanel;
+    private final JSplitPane splitPane;
 
     public JMapViewerTree(String name) {
         this(name, false);

@@ -12,8 +12,8 @@ import org.openstreetmap.gui.jmapviewer.interfaces.MapRectangle;
 
 public class MapRectangleImpl extends MapObjectImpl implements MapRectangle {
 
-    private Coordinate topLeft;
-    private Coordinate bottomRight;
+    private final Coordinate topLeft;
+    private final Coordinate bottomRight;
 
     public MapRectangleImpl(Coordinate topLeft, Coordinate bottomRight) {
         this(null, null, topLeft, bottomRight);
