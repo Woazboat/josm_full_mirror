@@ -95,7 +95,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
         Matcher m = PATTERN_SWITCH.matcher(baseUrl);
         if (m.find()) {
             rand = new Random();
-            randomParts = m.group(1).split(",");
+            randomParts = m.group(1).split(",", -1);
         }
         // Capturing group pattern on header values
         replacePattern((matcher, output) -> {

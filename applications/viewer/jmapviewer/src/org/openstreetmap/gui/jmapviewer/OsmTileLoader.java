@@ -166,7 +166,7 @@ public class OsmTileLoader implements TileLoader {
             try {
                 str = urlConn.getHeaderField("Cache-Control");
                 if (str != null) {
-                    for (String token: str.split(",")) {
+                    for (String token: str.split(",", -1)) {
                         if (token.startsWith("max-age=")) {
                             lng = Long.parseLong(token.substring(8)) * 1000 +
                                     System.currentTimeMillis();
