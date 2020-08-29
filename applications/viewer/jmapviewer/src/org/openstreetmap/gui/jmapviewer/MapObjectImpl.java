@@ -91,11 +91,11 @@ public abstract class MapObjectImpl {
     }
 
     private boolean isVisibleLayer() {
-        return layer == null || layer.isVisible() == null ? true : layer.isVisible();
+        return layer == null || layer.isVisible() == null || layer.isVisible();
     }
 
     public boolean isVisible() {
-        return visible == null ? isVisibleLayer() : visible.booleanValue();
+        return visible == null ? isVisibleLayer() : visible;
     }
 
     public void setVisible(Boolean visible) {
