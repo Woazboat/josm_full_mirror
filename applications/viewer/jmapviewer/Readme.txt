@@ -10,15 +10,15 @@ JMapViewer
 (c) 2010-2011, Michael Vigovsky
 (c) 2011-2017, Paul Hartmann
 (c) 2011-2016, Gleb Smirnoff
-(c) 2011-2020, Vincent Privat
+(c) 2011-2021, Vincent Privat
 (c) 2011, Jason Huntley
-(c) 2012-2016, Simon Legner
+(c) 2012-2020, Simon Legner
 (c) 2012, Teemu Koskinen
 (c) 2012, Jiri Klement
 (c) 2013, Matt Hoover
 (c) 2013, Alexei Kasatkin
 (c) 2013, Galo Higueras
-(c) 2015-2016, Wiktor Niesiobędzki
+(c) 2015-2019, Wiktor Niesiobędzki
 (c) 2017, Robert Scott
 
 This work bases partly on the JOSM plugin "Slippy Map Chooser" by Tim Haussmann
