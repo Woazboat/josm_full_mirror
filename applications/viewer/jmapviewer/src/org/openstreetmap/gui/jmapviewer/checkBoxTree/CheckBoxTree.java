@@ -3,6 +3,7 @@ package org.openstreetmap.gui.jmapviewer.checkBoxTree;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
+import java.util.Objects;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -150,7 +151,11 @@ public class CheckBoxTree extends JTree {
     private static void setChildrens(DefaultMutableTreeNode node, Boolean value) {
         for (int i = 0; i < node.getChildCount(); i++) {
             DefaultMutableTreeNode childNode = node(node.getChildAt(i));
-            if (!data(childNode).isSelected().equals(data(node).isSelected())) {
+            // Fix NPE from #20557
+            final CheckBoxNodeData childData = data(childNode);
+            final CheckBoxNodeData nodeData = data(node);
+            if (childData != null && nodeData != null &&
+                    !Objects.equals(childData.isSelected(), nodeData.isSelected())) {
                 data(childNode).setSelected(data(node).isSelected());
                 setChildrens(childNode, value);
             }
