@@ -209,6 +209,12 @@ while(my $line = <>)
     $combo_n = "";
     print "\n";
   }
+  # extract some values which we need at other places
+  elsif($line =~ /<key key="(highway|railway|waterway|landuse|building)" value="([^"]+)"/)
+  {
+    my ($key, $val) = ($1, $2);
+    print infoblock("key") . " trc(\"$key\", \"$val\");"."\n";
+  }
   elsif(!$line)
   {
     print "\n";
