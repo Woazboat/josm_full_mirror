@@ -1,0 +1,120 @@
+{
+  "version": 8,
+  "name": "Mapillary",
+  "owner": "Mapillary",
+  "id": "mapillary",
+  "sources": {
+    "mapillary-source": {
+      "maxzoom": 14,
+      "tiles": [
+        "https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=MLY|4223665974375089|d62822dd792b6a823d0794ef26450398"
+      ],
+      "type": "vector"
+    },
+    "mapillary-points-source": {
+      "maxzoom": 14,
+      "minzoom": 14,
+      "tiles": [
+        "https://tiles.mapillary.com/maps/vtp/mly_map_feature_point/2/{z}/{x}/{y}?access_token=MLY|4223665974375089|d62822dd792b6a823d0794ef26450398"
+      ],
+      "type": "vector"
+    },
+    "mapillary-traffic-signs-source": {
+      "maxzoom": 14,
+      "minzoom": 14,
+      "tiles": [
+        "https://tiles.mapillary.com/maps/vtp/mly_map_feature_traffic_sign/2/{z}/{x}/{y}?access_token=MLY|4223665974375089|d62822dd792b6a823d0794ef26450398"
+      ],
+      "type": "vector"
+    }
+  },
+  "sprite": "https://www.mapillary.com/assets/sprites/v1/sprites",
+  "layers": [
+    {
+      "filter": [
+        "==",
+        "is_pano",
+        true
+      ],
+      "id": "mapillary-panos",
+      "type": "circle",
+      "source": "mapillary-source",
+      "source-layer": "image",
+      "minzoom": 17,
+      "paint": {
+        "circle-color": "#05CB63",
+        "circle-opacity": 0.5,
+        "circle-radius": 18
+      }
+    },
+    {
+      "id": "mapillary-dots",
+      "type": "circle",
+      "source": "mapillary-source",
+      "source-layer": "image",
+      "interactive": true,
+      "minzoom": 14,
+      "paint": {
+        "circle-color": "#05CB63",
+        "circle-radius": 6
+      }
+    },
+    {
+      "id": "mapillary-lines",
+      "type": "line",
+      "source": "mapillary-source",
+      "source-layer": "sequence",
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#05CB63",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "mapillary-overview",
+      "type": "circle",
+      "source": "mapillary-source",
+      "source-layer": "overview",
+      "maxzoom": 6,
+      "paint": {
+        "circle-radius": 4,
+        "circle-opacity": 0.6,
+        "circle-color": "#05CB63"
+      }
+    },
+    {
+      "id": "mapillary-points",
+      "type": "symbol",
+      "source": "mapillary-points-source",
+      "source-layer": "point",
+      "interactive": true,
+      "minzoom": 14,
+      "layout": {
+        "icon-image": "{value}",
+        "icon-allow-overlap": true,
+        "symbol-avoid-edges": true
+      },
+      "paint": {
+        "text-color": "#fff",
+        "text-halo-color": "#000"
+      }
+    },
+    {
+      "id": "mapillary-traffic-signs",
+      "type": "symbol",
+      "source": "mapillary-traffic-signs-source",
+      "source-layer": "traffic_sign",
+      "interactive": true,
+      "minzoom": 14,
+      "layout": {
+        "icon-image": "{value}",
+        "icon-allow-overlap": true,
+        "symbol-avoid-edges": true
+      },
+      "paint": {
+        "text-color": "#fff",
+        "text-halo-color": "#000"
+      }
+    }
+  ]
+}
