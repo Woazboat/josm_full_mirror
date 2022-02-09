@@ -101,7 +101,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
             replacePattern((matcher, output) -> {
                 try {
                     matcher.appendReplacement(output, FeatureAdapter.retrieveApiKey(imageryId));
-                } catch (IOException e) {
+                } catch (IOException|NullPointerException e) {
                     throw new IllegalArgumentException(e);
                 }
             }, PATTERN_API_KEY);
