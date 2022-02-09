@@ -10,7 +10,7 @@ JMapViewer
 (c) 2010-2011, Michael Vigovsky
 (c) 2011-2017, Paul Hartmann
 (c) 2011-2016, Gleb Smirnoff
-(c) 2011-2021, Vincent Privat
+(c) 2011-2022, Vincent Privat
 (c) 2011, Jason Huntley
 (c) 2012-2020, Simon Legner
 (c) 2012, Teemu Koskinen
