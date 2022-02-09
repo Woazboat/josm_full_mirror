@@ -1,4 +1,4 @@
-// License: GPL. For details, see Readme.txt file.
+ // License: GPL. For details, see Readme.txt file.
 package org.openstreetmap.gui.jmapviewer.tilesources;
 
 import java.io.IOException;
@@ -53,12 +53,6 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
     private static final Pattern PATTERN_API_KEY = Pattern.compile("\\{apikey\\}");
     private static final Pattern PATTERN_PARAM  = Pattern.compile("\\{((?:\\d+-)?z(?:oom)?(:?[+-]\\d+)?|x|y|!y|-y|switch:([^}]+))\\}");
 
-    /**
-     * Pattern used only for compatibility with older JOSM clients. To remove end of 2020, with an update of JOSM wiki
-     * @deprecated to remove end of 2020
-     */
-    @Deprecated
-    private static final Pattern PATTERN_API_KEY_COMPATIBILITY = Pattern.compile("_apiKey_");
     // CHECKSTYLE.ON: SingleSpaceSeparator
 
     private static final Pattern[] ALL_PATTERNS = {
@@ -110,7 +104,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
                 } catch (IOException e) {
                     throw new IllegalArgumentException(e);
                 }
-            }, PATTERN_API_KEY, PATTERN_API_KEY_COMPATIBILITY);
+            }, PATTERN_API_KEY);
         }
         // Capturing group pattern on zoom values
         m = PATTERN_ZOOM.matcher(baseUrl);
