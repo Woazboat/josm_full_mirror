@@ -1,4 +1,4 @@
- // License: GPL. For details, see Readme.txt file.
+// License: GPL. For details, see Readme.txt file.
 package org.openstreetmap.gui.jmapviewer.tilesources;
 
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
             replacePattern((matcher, output) -> {
                 try {
                     matcher.appendReplacement(output, FeatureAdapter.retrieveApiKey(imageryId));
-                } catch (IOException|NullPointerException e) {
+                } catch (IOException | RuntimeException e) {
                     throw new IllegalArgumentException(e);
                 }
             }, PATTERN_API_KEY);
