@@ -28,7 +28,7 @@
       "type": "vector"
     }
   },
-  "sprite": "https://www.mapillary.com/assets/sprites/v1/sprites",
+  "sprite": "https://external.xx.fbcdn.net/maps/vt/sprites/mapillary_sprites",
   "layers": [
     {
       "filter": [
