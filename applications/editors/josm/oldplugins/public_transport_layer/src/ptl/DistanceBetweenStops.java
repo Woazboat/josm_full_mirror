@@ -13,7 +13,6 @@ import javax.swing.JOptionPane;
 
 import org.openstreetmap.josm.actions.JosmAction;
 import org.openstreetmap.josm.data.SystemOfMeasurement;
-import org.openstreetmap.josm.data.coor.LatLon;
 import org.openstreetmap.josm.data.osm.DefaultNameFormatter;
 import org.openstreetmap.josm.data.osm.Node;
 import org.openstreetmap.josm.data.osm.OsmPrimitiveType;
@@ -45,9 +44,9 @@ public class DistanceBetweenStops extends JosmAction {
         final List<RelationMember> routeSegments = new ArrayList<>();
         final List<Node> routeNodes = new ArrayList<>();
         for (final RelationMember member : route.getMembers()) {
-            if (member.hasRole("stop", "stop_exit_only", "stop_entry_only") && OsmPrimitiveType.NODE.equals(member.getType())) {
+            if (member.hasRole("stop", "stop_exit_only", "stop_entry_only") && OsmPrimitiveType.NODE == member.getType()) {
                 stopNodes.add(member.getNode());
-            } else if (member.hasRole("") && OsmPrimitiveType.WAY.equals(member.getType())) {
+            } else if (member.hasRole("") && OsmPrimitiveType.WAY == member.getType()) {
                 routeSegments.add(member);
             }
         }
@@ -122,12 +121,8 @@ public class DistanceBetweenStops extends JosmAction {
         double length = 0;
         Node lastN = null;
         for (Node n : nodes) {
-            if (lastN != null) {
-                LatLon lastNcoor = lastN.getCoor();
-                LatLon coor = n.getCoor();
-                if (lastNcoor != null && coor != null) {
-                    length += coor.greatCircleDistance(lastNcoor);
-                }
+            if (lastN != null && n != null && lastN.isLatLonKnown() && n.isLatLonKnown()) {
+                length += n.greatCircleDistance(lastN);
             }
             lastN = n;
         }
@@ -152,18 +147,15 @@ public class DistanceBetweenStops extends JosmAction {
             sb.append(calculateDistanceBetweenStops(relation)).append("\n");
         }
 
-        new ExtendedDialog(MainApplication.getMainFrame(), getValue(NAME).toString(), new String[]{tr("Close")}) {
-            {
-                setButtonIcons(new String[]{"ok.png"});
-                final JosmTextArea jte = new JosmTextArea();
-                jte.setFont(GuiHelper.getMonospacedFont(jte));
-                jte.setEditable(false);
-                jte.append(sb.toString());
-                jte.setSelectionStart(0);
-                jte.setSelectionEnd(0);
-                setContent(jte);
-            }
-
-        }.showDialog();
+        ExtendedDialog extendedDialog = new ExtendedDialog(MainApplication.getMainFrame(), getValue(NAME).toString(), tr("Close"));
+        extendedDialog.setButtonIcons("ok");
+        final JosmTextArea jte = new JosmTextArea();
+        jte.setFont(GuiHelper.getMonospacedFont(jte));
+        jte.setEditable(false);
+        jte.append(sb.toString());
+        jte.setSelectionStart(0);
+        jte.setSelectionEnd(0);
+        extendedDialog.setContent(jte);
+        extendedDialog.showDialog();
     }
 }

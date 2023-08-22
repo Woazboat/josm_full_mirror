@@ -37,7 +37,6 @@ import org.openstreetmap.josm.tools.ImageProvider;
 import org.openstreetmap.josm.tools.Logging;
 import org.openstreetmap.josm.tools.MultiMap;
 import org.openstreetmap.josm.tools.Pair;
-import org.openstreetmap.josm.tools.Utils;
 
 /**
  * Public transport layer.
@@ -70,7 +69,7 @@ public class PublicTransportLayer extends Layer {
             final Way way = new Way();
             Node previousNode = null;
             for (final RelationMember member : relation.getMembers()) {
-                if (OsmPrimitiveType.NODE.equals(member.getType()) && "stop".equals(member.getRole())) {
+                if (OsmPrimitiveType.NODE == member.getType() && "stop".equals(member.getRole())) {
                     way.addNode(member.getNode());
                     if (previousNode != null) {
                         segmentRefs.put(Pair.create(previousNode, member.getNode()), relation.get("ref"));
@@ -82,8 +81,8 @@ public class PublicTransportLayer extends Layer {
             Color color = Color.GREEN;
             try {
                 color = ColorHelper.html2color(relation.get("colour"));
-            } catch (RuntimeException ignore) {
-                Logging.trace(ignore);
+            } catch (RuntimeException runtimeException) {
+                Logging.trace(runtimeException);
             }
             renderer.drawWay(way, color, new BasicStroke(1), null, null, 0, doDrawArrows, false, false, false);
         }
@@ -102,7 +101,7 @@ public class PublicTransportLayer extends Layer {
         Color color = new Color(0x80FFFFFF, true);
 
         for (Pair<Node, Node> nodePair : segmentRefs.keySet()) {
-            final String label = Utils.join(tr(", "), new TreeSet<>(segmentRefs.get(nodePair)));
+            final String label = String.join(", ", new TreeSet<>(segmentRefs.get(nodePair)));
             c.put(StyleKeys.TEXT, label);
             final TextLabel text = TextLabel.create(env, color, false);
             final Way way = new Way();
