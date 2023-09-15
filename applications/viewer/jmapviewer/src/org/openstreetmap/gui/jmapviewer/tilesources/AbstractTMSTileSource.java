@@ -1,7 +1,6 @@
 // License: GPL. For details, see Readme.txt file.
 package org.openstreetmap.gui.jmapviewer.tilesources;
 
-import java.awt.Point;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,12 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.openstreetmap.gui.jmapviewer.FeatureAdapter;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.OsmMercator;
-import org.openstreetmap.gui.jmapviewer.Tile;
-import org.openstreetmap.gui.jmapviewer.TileXY;
-import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 
 /**
  * Class generalizing all tile based tile sources
@@ -39,7 +37,7 @@ public abstract class AbstractTMSTileSource extends AbstractTileSource {
      *
      * @param info description of the Tile Source
      */
-    public AbstractTMSTileSource(TileSourceInfo info) {
+    protected AbstractTMSTileSource(TileSourceInfo info) {
         this.name = info.getName();
         this.baseUrl = info.getUrl();
         if (baseUrl != null && baseUrl.endsWith("/")) {
@@ -89,10 +87,11 @@ public abstract class AbstractTMSTileSource extends AbstractTileSource {
     }
 
     /**
+     * Get the tile path after the URL
      * @param zoom level of the tile
      * @param tilex tile number in x axis
      * @param tiley tile number in y axis
-     * @return String containg path part of URL of the tile
+     * @return String containing path part of URL of the tile
      * @throws IOException when subclass cannot return the tile URL
      */
     public String getTilePath(int zoom, int tilex, int tiley) throws IOException {
@@ -125,31 +124,6 @@ public abstract class AbstractTMSTileSource extends AbstractTileSource {
             return getDefaultTileSize();
         }
         return tileSize;
-    }
-
-    @Override
-    public Point latLonToXY(ICoordinate point, int zoom) {
-        return latLonToXY(point.getLat(), point.getLon(), zoom);
-    }
-
-    @Override
-    public ICoordinate xyToLatLon(Point point, int zoom) {
-        return xyToLatLon(point.x, point.y, zoom);
-    }
-
-    @Override
-    public TileXY latLonToTileXY(ICoordinate point, int zoom) {
-        return latLonToTileXY(point.getLat(), point.getLon(), zoom);
-    }
-
-    @Override
-    public ICoordinate tileXYToLatLon(TileXY xy, int zoom) {
-        return tileXYToLatLon(xy.getXIndex(), xy.getYIndex(), zoom);
-    }
-
-    @Override
-    public ICoordinate tileXYToLatLon(Tile tile) {
-        return tileXYToLatLon(tile.getXtile(), tile.getYtile(), tile.getZoom());
     }
 
     @Override
@@ -190,22 +164,23 @@ public abstract class AbstractTMSTileSource extends AbstractTileSource {
         }
         if (noTileChecksums != null && content != null) {
             for (Entry<String, Set<String>> searchEntry: noTileChecksums.entrySet()) {
-                MessageDigest md = null;
+                MessageDigest md;
                 try {
                     md = MessageDigest.getInstance(searchEntry.getKey());
                 } catch (NoSuchAlgorithmException e) {
+                    FeatureAdapter.getLogger(this.getClass()).log(Level.FINER, searchEntry.getKey() + " algorithm was not found", e);
                     break;
                 }
                 byte[] byteDigest = md.digest(content);
                 final int len = byteDigest.length;
 
                 char[] hexChars = new char[len * 2];
-                for (int i = 0, j = 0; i < len; i++) {
-                    final int v = byteDigest[i];
+                int j = 0;
+                for (final int v : byteDigest) {
                     int vn = (v & 0xf0) >> 4;
-                    hexChars[j++] = (char) (vn + (vn >= 10 ? 'a'-10 : '0'));
+                    hexChars[j++] = (char) (vn + (vn >= 10 ? 'a' - 10 : '0'));
                     vn = (v & 0xf);
-                    hexChars[j++] = (char) (vn + (vn >= 10 ? 'a'-10 : '0'));
+                    hexChars[j++] = (char) (vn + (vn >= 10 ? 'a' - 10 : '0'));
                 }
                 for (String val: searchEntry.getValue()) {
                     if (new String(hexChars).equalsIgnoreCase(val)) {

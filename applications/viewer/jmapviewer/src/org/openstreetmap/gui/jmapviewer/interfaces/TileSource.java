@@ -12,6 +12,7 @@ import org.openstreetmap.gui.jmapviewer.TileRange;
 import org.openstreetmap.gui.jmapviewer.TileXY;
 
 /**
+ * Used for generating tiles
  *
  * @author Jan Peter Stotz
  */
@@ -44,7 +45,7 @@ public interface TileSource extends Attributed {
 
     /**
      * A unique id for this tile source.
-     *
+     * <p>
      * Unlike the name it has to be unique and has to consist only of characters
      * valid for filenames.
      *
@@ -110,7 +111,9 @@ public interface TileSource extends Attributed {
      * @param zoom zoom level
      * @return the pixel coordinates
      */
-    Point latLonToXY(ICoordinate point, int zoom);
+    default Point latLonToXY(ICoordinate point, int zoom) {
+        return latLonToXY(point.getLat(), point.getLon(), zoom);
+    }
 
     /**
      * Transforms a point in pixel space to longitude/latitude (WGS84).
@@ -118,7 +121,9 @@ public interface TileSource extends Attributed {
      * @param zoom zoom level
      * @return WGS84 Coordinates of given point
      */
-    ICoordinate xyToLatLon(Point point, int zoom);
+    default ICoordinate xyToLatLon(Point point, int zoom) {
+        return xyToLatLon(point.x, point.y, zoom);
+    }
 
     /**
      * Transforms a point in pixel space to longitude/latitude (WGS84).
@@ -144,7 +149,9 @@ public interface TileSource extends Attributed {
      * @param zoom zoom level
      * @return x and y tile indices
      */
-    TileXY latLonToTileXY(ICoordinate point, int zoom);
+    default TileXY latLonToTileXY(ICoordinate point, int zoom) {
+        return latLonToTileXY(point.getLat(), point.getLon(), zoom);
+    }
 
     /**
      * Transforms tile indices to longitude and latitude.
@@ -152,7 +159,9 @@ public interface TileSource extends Attributed {
      * @param zoom zoom level
      * @return WGS84 coordinates of given tile
      */
-    ICoordinate tileXYToLatLon(TileXY xy, int zoom);
+    default ICoordinate tileXYToLatLon(TileXY xy, int zoom) {
+        return tileXYToLatLon(xy.getXIndex(), xy.getYIndex(), zoom);
+    }
 
     /**
      * Determines to longitude and latitude of a tile.
@@ -160,7 +169,9 @@ public interface TileSource extends Attributed {
      * @param tile Tile
      * @return WGS84 coordinates of given tile
      */
-    ICoordinate tileXYToLatLon(Tile tile);
+    default ICoordinate tileXYToLatLon(Tile tile) {
+        return tileXYToLatLon(tile.getXtile(), tile.getYtile(), tile.getZoom());
+    }
 
     /**
      * Transforms tile indices to longitude and latitude.
@@ -248,7 +259,7 @@ public interface TileSource extends Attributed {
     /**
      * Returns a range of tiles, that cover a given tile, which is
      * usually at a different zoom level.
-     *
+     * <p>
      * In standard tile layout, 4 tiles cover a tile one zoom lower, 16 tiles
      * cover a tile 2 zoom levels below etc.
      * If the zoom level of the covering tiles is greater or equal, a single
@@ -262,7 +273,7 @@ public interface TileSource extends Attributed {
 
     /**
      * Get coordinate reference system for this tile source.
-     *
+     * <p>
      * E.g. "EPSG:3857" for Google-Mercator.
      * @return code for the coordinate reference system in use
      */
