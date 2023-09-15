@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="all" name="jmapviewer" xmlns:jacoco="antlib:org.jacoco.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
 
-    <property name="java.lang.version" value="1.8" />
+    <property name="java.lang.version" value="8" />
     <dirname property="base.dir" file="${ant.file.jmapviewer}"/>
     <property name="tools.dir" location="${base.dir}/tools"/>
     <property name="jacoco.includes" value="org.openstreetmap.gui.jmapviewer.*" />
@@ -57,7 +57,20 @@
     </target>
 
     <target name="build" depends="clean">
-        <javac srcdir="src" destdir="bin" source="${java.lang.version}" target="${java.lang.version}" debug="true" includeantruntime="false" encoding="UTF-8">
+        <!-- compile module info - we need to compile everything to ensure that all requires are there -->
+        <javac srcdir="src" destdir="bin" release="9" debug="true" includeantruntime="false" encoding="UTF-8" if:set="isJava9">
+            <include name="module-info.java" />
+            <include name="org/openstreetmap/gui/jmapviewer/**" />
+        </javac>
+
+        <!-- Remove the files compiled with Java 9 so that the next compile stage will compile to the appropriate version -->
+        <delete>
+            <fileset dir="bin">
+                <include name="org/openstreetmap/gui/jmapviewer/**" />
+            </fileset>
+        </delete>
+
+        <javac srcdir="src" destdir="bin" release="${java.lang.version}" debug="true" includeantruntime="false" encoding="UTF-8">
             <include name="org/openstreetmap/gui/jmapviewer/**" />
         </javac>
 
@@ -79,11 +92,11 @@
     <target name="pack" depends="build">
         <!-- Create the JAR file containing the compiled class files -->
         <jar destfile="JMapViewer.jar" filesetmanifest="mergewithoutmain">
-            <fileset dir="bin" includes="**/jmapviewer/**" />
+            <fileset dir="bin" includes="module-info.class,**/jmapviewer/**" />
         </jar>
         <!-- Create the JAR file containing the source java files -->
         <jar destfile="JMapViewer_src.jar" filesetmanifest="mergewithoutmain">
-            <fileset dir="src" includes="**/jmapviewer/**" />
+            <fileset dir="src" includes="module-info.java,**/jmapviewer/**" />
         </jar>
     </target>
     
@@ -122,7 +135,8 @@
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" 
             classpath="tools/checkstyle/checkstyle-all.jar"/>
         <checkstyle config="tools/checkstyle/jmapviewer_checks.xml">
-            <fileset dir="${basedir}/src" includes="**/*.java" />
+            <!-- Exclude the module-info since checkstyle currently cannot parse it -->
+            <fileset dir="${basedir}/src" includes="**/*.java" excludes="module-info.java" />
             <formatter type="xml" toFile="checkstyle-jmapviewer.xml"/>
         </checkstyle>
     </target>
