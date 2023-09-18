@@ -1,8 +1,8 @@
 // License: GPL. For details, see Readme.txt file.
 package org.openstreetmap.gui.jmapviewer.tilesources;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for TemplaedTMSTileSource
@@ -48,7 +48,7 @@ public class TemplatedTMSTileSourceTest {
      * Check standard template
      */
     @Test
-    public void testGetTileUrl() {
+    void testGetTileUrl() {
         checkGetTileUrl(
                 "http://localhost/{z}/{x}/{y}",
                 "http://localhost/1/2/3",
@@ -60,7 +60,7 @@ public class TemplatedTMSTileSourceTest {
      * Check template with positive zoom index
      */
     @Test
-    public void testGetTileUrl_positive_zoom() {
+    void testGetTileUrl_positive_zoom() {
         checkGetTileUrl(
                 "http://localhost/{zoom+5}/{x}/{y}",
                 "http://localhost/6/2/3",
@@ -72,7 +72,7 @@ public class TemplatedTMSTileSourceTest {
      * Check template with negative zoom index
      */
     @Test
-    public void testGetTileUrl_negative_zoom() {
+    void testGetTileUrl_negative_zoom() {
         checkGetTileUrl(
                 "http://localhost/{zoom-5}/{x}/{y}",
                 "http://localhost/-4/2/3",
@@ -84,7 +84,7 @@ public class TemplatedTMSTileSourceTest {
      * Check template with inverse zoom index
      */
     @Test
-    public void testGetTileUrl_inverse_negative_zoom() {
+    void testGetTileUrl_inverse_negative_zoom() {
         checkGetTileUrl(
                 "http://localhost/{5-zoom}/{x}/{y}",
                 "http://localhost/4/2/3",
@@ -96,7 +96,7 @@ public class TemplatedTMSTileSourceTest {
      * Check template with inverse zoom index and negative zoom index
      */
     @Test
-    public void testGetTileUrl_both_offsets() {
+    void testGetTileUrl_both_offsets() {
         checkGetTileUrl(
                 "http://localhost/{10-zoom-5}/{x}/{y}",
                 "http://localhost/4/2/3",
@@ -108,7 +108,7 @@ public class TemplatedTMSTileSourceTest {
      * Test template with switch
      */
     @Test
-    public void testGetTileUrl_apiKey() {
+    void testGetTileUrl_apiKey() {
         System.setProperty("id1.api-key", "wololo");
         TileSourceInfo testImageryTMS = new TileSourceInfo("test imagery", "http://localhost/{zoom}/{x}/{y}?token={apikey}&foo=bar", "id1");
         TemplatedTMSTileSource ts = new TemplatedTMSTileSource(testImageryTMS);
@@ -119,7 +119,7 @@ public class TemplatedTMSTileSourceTest {
      * Test template with switch
      */
     @Test
-    public void testGetTileUrl_switch() {
+    void testGetTileUrl_switch() {
         TileSourceInfo testImageryTMS = new TileSourceInfo("test imagery", "http://{switch:a,b,c}.localhost/{10-zoom-5}/{x}/{y}", "id1");
         TemplatedTMSTileSource ts = new TemplatedTMSTileSource(testImageryTMS);
         assertTrue(
@@ -158,7 +158,7 @@ public class TemplatedTMSTileSourceTest {
     }
 
     @Test
-    public void testGetTileUrl_yahoo() {
+    void testGetTileUrl_yahoo() {
         checkGetTileUrl(
                 "http://localhost/{z}/{x}/{!y}",
                 "http://localhost/1/2/-3",
@@ -168,7 +168,7 @@ public class TemplatedTMSTileSourceTest {
     }
 
     @Test
-    public void testGetTileUrl_negative_y() {
+    void testGetTileUrl_negative_y() {
         checkGetTileUrl(
                 "http://localhost/{z}/{x}/{-y}",
                 "http://localhost/1/2/-2",
@@ -188,7 +188,7 @@ public class TemplatedTMSTileSourceTest {
      * Tests all entries in TEST_DATA. This test will fail if {switch:...} template is used
      */
     @Test
-    public void testAllUrls() {
+    void testAllUrls() {
         for (String[] test: TEST_DATA) {
             TileSourceInfo testImageryTMS = new TileSourceInfo("test imagery", test[0], "id1");
             TemplatedTMSTileSource ts = new TemplatedTMSTileSource(testImageryTMS);

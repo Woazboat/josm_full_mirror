@@ -1,0 +1,30 @@
+<ivy-module version="2.0" xmlns:maven="http://ant.apache.org/ivy/maven">
+    <info organisation="org.openstreetmap.josm" module="jmapviewer"/>
+    <configurations>
+        <conf name="spotbugs" visibility="private" description="Everything needed for running SpotBugs"/>
+        <conf name="checkstyle" visibility="private" description="Everything needed for running Checkstyle"/>
+        <conf name="jacocoant" visibility="private" description="Jacoco Ant test library"/>
+        <conf name="test" visibility="private" description="Test libraries"/>
+    </configurations>
+    <dependencies>
+        <!-- jacocoant->default -->
+        <dependency conf="jacocoant->default" org="org.jacoco" name="org.jacoco.ant" rev="0.8.10">
+            <artifact name="org.jacoco.ant" type="jar" maven:classifier="nodeps"/>
+        </dependency>
+        <!-- test->default -->
+        <dependency conf="test->default" org="com.github.spotbugs" name="spotbugs-annotations" rev="4.7.3"/>
+        <dependency conf="test->default" org="org.junit.platform" name="junit-platform-launcher" rev="1.10.0"/>
+        <dependency conf="test->default" org="org.junit.platform" name="junit-platform-suite" rev="1.10.0"/>
+        <dependency conf="test->default" org="org.junit.vintage" name="junit-vintage-engine" rev="5.10.0"/>
+        <dependency conf="test->default" org="org.junit.jupiter" name="junit-jupiter-params" rev="5.10.0"/>
+        <dependency conf="test->default" org="org.junit.jupiter" name="junit-jupiter-api" rev="5.10.0"/>
+        <dependency conf="test->default" org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.10.0"/>
+        <dependency conf="test->default" org="org.junit.jupiter" name="junit-jupiter-migrationsupport" rev="5.10.0"/>
+        <!-- checkstyle->default -->
+        <dependency org="com.puppycrawl.tools" name="checkstyle" rev="9.3" conf="checkstyle->default"/>
+        <!-- spotbugs->default -->
+        <dependency org="com.github.spotbugs" name="spotbugs" rev="4.7.3" conf="spotbugs->default"/>
+        <dependency org="com.github.spotbugs" name="spotbugs-ant" rev="4.7.3" conf="spotbugs->default"/>
+    </dependencies>
+</ivy-module>
+

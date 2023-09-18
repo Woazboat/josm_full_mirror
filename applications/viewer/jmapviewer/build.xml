@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="all" name="jmapviewer" xmlns:jacoco="antlib:org.jacoco.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
+<project default="all" name="jmapviewer"
+         xmlns:jacoco="antlib:org.jacoco.ant"
+         xmlns:if="ant:if"
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+>
 
     <property name="java.lang.version" value="8" />
     <dirname property="base.dir" file="${ant.file.jmapviewer}"/>
@@ -26,9 +30,6 @@
         </not>
     </condition>
     <path id="test.classpath">
-        <fileset dir="${tools.dir}/testlib">
-            <include name="**/*.jar"/>
-        </fileset>
         <pathelement location="bin"/>
     </path>
 
@@ -81,6 +82,10 @@
         </copy>
     </target>
 
+    <target name="checkdepsupdate" depends="resolve">
+        <ivy:checkdepsupdate/>
+    </target>
+
     <target name="svn_info" description="Get SVN info for use in JAR/ZIP filenames.">
         <!-- Get the svn ReleaseVersion property -->
         <exec executable="svn" outputproperty="svnReleaseVersion">
@@ -131,9 +136,9 @@
         </zip>
     </target>
 
-    <target name="checkstyle">
-        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" 
-            classpath="tools/checkstyle/checkstyle-all.jar"/>
+    <target name="checkstyle" depends="resolve">
+        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties"
+            classpathref="checkstyle.classpath"/>
         <checkstyle config="tools/checkstyle/jmapviewer_checks.xml">
             <!-- Exclude the module-info since checkstyle currently cannot parse it -->
             <fileset dir="${basedir}/src" includes="**/*.java" excludes="module-info.java" />
@@ -141,15 +146,10 @@
         </checkstyle>
     </target>
 
-    <target name="spotbugs" depends="pack">
+    <target name="spotbugs" depends="pack,resolve">
         <taskdef name="spotbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" 
-            classpath="tools/spotbugs/spotbugs-ant.jar"/>
-        <path id="spotbugs-classpath">
-            <fileset dir="tools/spotbugs/">
-                <include name="*.jar"/>
-            </fileset>
-        </path>
-        <property name="spotbugs-classpath" refid="spotbugs-classpath"/>
+            classpathref="spotbugs.classpath"/>
+        <property name="spotbugs-classpath" refid="spotbugs.classpath"/>
         <spotbugs output="xml"
                 outputFile="spotbugs-jmapviewer.xml"
                 classpath="${spotbugs-classpath}"
@@ -177,32 +177,44 @@
         </javadoc>
     </target>
 
-    <target name="test" depends="clean, build">
-        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" classpath="${tools.dir}/jacocoant.jar" />
+    <target name="resolve" description="Resolve Ivy dependencies">
+        <ivy:resolve/>
+        <ivy:cachepath pathid="checkstyle.classpath" conf="checkstyle"/>
+        <ivy:cachepath pathid="testlib.classpath" conf="test"/>
+        <ivy:cachepath pathid="jacoco.classpath" conf="jacocoant"/>
+        <ivy:cachepath pathid="spotbugs.classpath" conf="spotbugs"/>
+    </target>
+
+    <target name="test" depends="clean, build, resolve">
+        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" classpathref="jacoco.classpath"/>
         <javac srcdir="test" destdir="bintest"
             target="${java.lang.version}" source="${java.lang.version}" debug="on"
             includeantruntime="false" createMissingPackageInfoClass="false" encoding="UTF-8">
             <compilerarg value="-Xlint:all"/>
             <compilerarg value="-Xlint:-serial"/>
             <classpath>
-            	<path refid="test.classpath"/>
+                <path refid="testlib.classpath"/>
+                <path refid="test.classpath"/>
             </classpath>
         </javac>
-        <jacoco:coverage enabled="@{coverage}" includes="${jacoco.includes}"
-            inclbootstrapclasses="${jacoco.inclbootstrapclasses}" inclnolocationclasses="${jacoco.inclnolocationclasses}">
-            <junit printsummary="yes" fork="true" forkmode="once">
-                <jvmarg value="-Dfile.encoding=UTF-8"/>
-                <classpath>
-                    <path refid="test.classpath"/>
-                    <pathelement location="bintest"/>
-                </classpath>
-                <formatter type="plain"/>
-                <formatter type="xml"/>
-                <batchtest fork="yes" todir="report">
-                    <fileset dir="bintest" includes="**/*Test.class"/>
-                </batchtest>
-            </junit>
-        </jacoco:coverage>
+        <jacoco:agent enabled="@{coverage}" includes="${jacoco.includes}"
+                      inclbootstrapclasses="${jacoco.inclbootstrapclasses}" inclnolocationclasses="${jacoco.inclnolocationclasses}" property="jacocoagent@{testfamily}@{testITsuffix}" if:true="@{coverage}"/>
+        <junitlauncher printsummary="yes">
+            <classpath>
+                <path refid="testlib.classpath"/>
+                <path refid="test.classpath"/>
+                <pathelement location="bintest"/>
+            </classpath>
+            <testclasses outputdir="report">
+                <fileset dir="bintest" includes="**/*Test.class"/>
+                <fork>
+                    <jvmarg value="-Dfile.encoding=UTF-8"/>
+                </fork>
+                <listener type="legacy-brief" sendSysOut="true" sendSysErr="true"/>
+                <listener type="legacy-plain" />
+                <listener type="legacy-xml" />
+            </testclasses>
+        </junitlauncher>
     </target>
 
 </project>
