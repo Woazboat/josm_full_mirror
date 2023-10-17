@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -50,24 +51,27 @@ public class BingAerialTileSource extends TMSTileSource {
     public static final String METADATA_API_SETTING = "jmapviewer.bing.metadata-api-url";
     /** Setting key for Bing API key */
     public static final String API_KEY_SETTING = "jmapviewer.bing.api-key";
-    /** Placeholder to specify Bing API key in metadata API URL*/
+    /** Placeholder to specify Bing API key in metadata API URL */
     public static final String API_KEY_PLACEHOLDER = "{apikey}";
+    /** Placeholder to specify Bing API layer in metadata API URL */
+    private static final String API_KEY_LAYER = "{layer}";
 
     /** Bing Metadata API URL */
     private static final String METADATA_API_URL =
-            "https://dev.virtualearth.net/REST/v1/Imagery/Metadata/Aerial?include=ImageryProviders&output=xml&key=" + API_KEY_PLACEHOLDER;
+            "https://dev.virtualearth.net/REST/v1/Imagery/Metadata/{layer}?include=ImageryProviders&output=xml&key=" + API_KEY_PLACEHOLDER;
     /** Original Bing API key created by Potlatch2 developers in 2010 */
     private static final String API_KEY = "Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU";
     
-    private static volatile Future<List<Attribution>> attributions; // volatile is required for getAttribution(), see below.
-    private static String imageUrlTemplate;
-    private static Integer imageryZoomMax;
-    private static String[] subdomains;
+    private volatile Future<List<Attribution>> attributions; // volatile is required for getAttribution(), see below.
+    private String imageUrlTemplate;
+    private int imageryZoomMax = Integer.MIN_VALUE;
+    private String[] subdomains;
 
-    private static final Pattern subdomainPattern = Pattern.compile("\\{subdomain\\}");
-    private static final Pattern quadkeyPattern = Pattern.compile("\\{quadkey\\}");
-    private static final Pattern culturePattern = Pattern.compile("\\{culture\\}");
+    private static final Pattern subdomainPattern = Pattern.compile("\\{subdomain}");
+    private static final Pattern quadkeyPattern = Pattern.compile("\\{quadkey}");
+    private static final Pattern culturePattern = Pattern.compile("\\{culture}");
     private String brandLogoUri;
+    private String layer = "Aerial";
 
     /**
      * Constructs a new {@code BingAerialTileSource}.
@@ -109,31 +113,41 @@ public class BingAerialTileSource extends TMSTileSource {
         return url;
     }
 
+    /**
+     * Set the layer for this Bing tile source
+     * @param layer The layer to use. See
+     *              <a href="https://learn.microsoft.com/en-us/bingmaps/rest-services/imagery/get-imagery-metadata#template-parameters">
+     *                  get-imagery-metadata
+     *              </a> for valid layers.
+     * @since JMapViewer 2.18
+     */
+    protected void setLayer(String layer) {
+        this.layer = layer;
+    }
+
     protected URL getAttributionUrl() throws MalformedURLException {
         return new URL(FeatureAdapter.getSetting(METADATA_API_SETTING, METADATA_API_URL)
-                .replace(API_KEY_PLACEHOLDER, FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY)));
+                .replace(API_KEY_PLACEHOLDER, FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY))
+                .replace(API_KEY_LAYER, this.layer));
     }
 
     protected List<Attribution> parseAttributionText(InputSource xml) throws IOException {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setXIncludeAware(false);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(xml);
 
             XPathFactory xPathFactory = XPathFactory.newInstance();
             XPath xpath = xPathFactory.newXPath();
-            imageUrlTemplate = xpath.compile("//ImageryMetadata/ImageUrl/text()").evaluate(document).replace(
-                    "http://ecn.{subdomain}.tiles.virtualearth.net/",
-                    "https://ecn.{subdomain}.tiles.virtualearth.net/");
-            imageUrlTemplate = culturePattern.matcher(imageUrlTemplate).replaceAll(Locale.getDefault().toString());
-            imageryZoomMax = Integer.valueOf(xpath.compile("//ImageryMetadata/ZoomMax/text()").evaluate(document));
+            setImageUrlTemplate(xpath.compile("//ImageryMetadata/ImageUrl/text()").evaluate(document));
+            setImageryZoomMax(Integer.parseInt(xpath.compile("//ImageryMetadata/ZoomMax/text()").evaluate(document)));
 
             NodeList subdomainTxt = (NodeList) xpath.compile("//ImageryMetadata/ImageUrlSubdomains/string/text()")
                     .evaluate(document, XPathConstants.NODESET);
-            subdomains = new String[subdomainTxt.getLength()];
-            for (int i = 0; i < subdomainTxt.getLength(); i++) {
-                subdomains[i] = subdomainTxt.item(i).getNodeValue();
-            }
+            setSubdomains(subdomainTxt);
 
             brandLogoUri = xpath.compile("/Response/BrandLogoUri/text()").evaluate(document);
 
@@ -163,10 +177,10 @@ public class BingAerialTileSource extends TMSTileSource {
                     attr.maxZoom = Integer.parseInt(zoomMaxXpath.evaluate(areaNode));
                     attr.minZoom = Integer.parseInt(zoomMinXpath.evaluate(areaNode));
 
-                    Double southLat = Double.valueOf(southLatXpath.evaluate(areaNode));
-                    Double northLat = Double.valueOf(northLatXpath.evaluate(areaNode));
-                    Double westLon = Double.valueOf(westLonXpath.evaluate(areaNode));
-                    Double eastLon = Double.valueOf(eastLonXpath.evaluate(areaNode));
+                    double southLat = Double.parseDouble(southLatXpath.evaluate(areaNode));
+                    double northLat = Double.parseDouble(northLatXpath.evaluate(areaNode));
+                    double westLon = Double.parseDouble(westLonXpath.evaluate(areaNode));
+                    double eastLon = Double.parseDouble(eastLonXpath.evaluate(areaNode));
                     attr.min = new Coordinate(southLat, westLon);
                     attr.max = new Coordinate(northLat, eastLon);
 
@@ -183,7 +197,7 @@ public class BingAerialTileSource extends TMSTileSource {
 
     @Override
     public int getMaxZoom() {
-        if (imageryZoomMax != null)
+        if (imageryZoomMax != Integer.MIN_VALUE)
             return imageryZoomMax;
         else
             return 22;
@@ -209,14 +223,14 @@ public class BingAerialTileSource extends TMSTileSource {
                 return FeatureAdapter.readImage(imageResource);
             } else {
                 // Some Linux distributions (like Debian) will remove Bing logo from sources, so get it at runtime
-                for (int i = 0; i < 5 && getAttribution() == null; i++) {
+                for (int i = 0; i < 5 && (getAttribution() == null || getAttribution().isEmpty()); i++) {
                     // Makes sure attribution is loaded
                     if (JMapViewer.debug) {
-                        System.out.println("Bing attribution attempt " + (i+1));
+                        LOG.log(Level.FINE, "Bing attribution attempt {0}", (i + 1));
                     }
                 }
                 if (brandLogoUri != null && !brandLogoUri.isEmpty()) {
-                    System.out.println("Reading Bing logo from "+brandLogoUri);
+                    LOG.log(Level.FINE, "Reading Bing logo from {0}", brandLogoUri);
                     return FeatureAdapter.readImage(new URL(brandLogoUri));
                 }
             }
@@ -242,22 +256,19 @@ public class BingAerialTileSource extends TMSTileSource {
     }
 
     protected Callable<List<Attribution>> getAttributionLoaderCallable() {
-        return new Callable<List<Attribution>>() {
-
-            @Override
-            public List<Attribution> call() throws Exception {
-                int waitTimeSec = 1;
-                while (true) {
-                    try {
-                        InputSource xml = new InputSource(getAttributionUrl().openStream());
-                        List<Attribution> r = parseAttributionText(xml);
-                        System.out.println("Successfully loaded Bing attribution data.");
-                        return r;
-                    } catch (IOException ex) {
-                        LOG.log(Level.SEVERE, "Could not connect to Bing API. Will retry in " + waitTimeSec + " seconds.");
-                        Thread.sleep(TimeUnit.SECONDS.toMillis(waitTimeSec));
-                        waitTimeSec *= 2;
-                    }
+        return () -> {
+            int waitTimeSec = 1;
+            while (true) {
+                try {
+                    InputSource xml = new InputSource(getAttributionUrl().openStream());
+                    List<Attribution> r = parseAttributionText(xml);
+                    LOG.log(Level.FINE, "Successfully loaded Bing attribution data.");
+                    return r;
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE, "Could not connect to Bing API. Will retry in " + waitTimeSec + " seconds.");
+                    LOG.log(Level.FINE, ex.getMessage(), ex);
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(waitTimeSec));
+                    waitTimeSec *= 2;
                 }
             }
         };
@@ -277,9 +288,11 @@ public class BingAerialTileSource extends TMSTileSource {
         try {
             return attributions.get();
         } catch (ExecutionException ex) {
-            throw new RuntimeException(ex.getCause());
+            throw new RuntimeException(ex);
         } catch (InterruptedException ign) {
-            LOG.log(Level.SEVERE, "InterruptedException: " + ign.getMessage());
+            LOG.log(Level.SEVERE, "InterruptedException: {0}", ign.getMessage());
+            LOG.log(Level.FINE, ign.getMessage(), ign);
+            Thread.currentThread().interrupt();
         }
         return null;
     }
@@ -297,9 +310,26 @@ public class BingAerialTileSource extends TMSTileSource {
                     .map(attr -> attr.attributionText)
                     .collect(Collectors.joining(" "));
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, e.getMessage(), e);
         }
         return "Error loading Bing attribution data";
+    }
+
+    private void setImageUrlTemplate(String template) {
+        String noHttpTemplate = template.replace("http://ecn.{subdomain}.tiles.virtualearth.net/",
+                "https://ecn.{subdomain}.tiles.virtualearth.net/");
+        this.imageUrlTemplate = culturePattern.matcher(noHttpTemplate).replaceAll(Locale.getDefault().toString());
+    }
+
+    private void setImageryZoomMax(int maxZoom) {
+        imageryZoomMax = maxZoom;
+    }
+
+    private void setSubdomains(NodeList subdomainTxt) {
+        subdomains = new String[subdomainTxt.getLength()];
+        for (int i = 0; i < subdomainTxt.getLength(); i++) {
+            subdomains[i] = subdomainTxt.item(i).getNodeValue();
+        }
     }
 
     private static String computeQuadTree(int zoom, int tilex, int tiley) {
