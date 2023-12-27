@@ -47,11 +47,12 @@ public class TileRange {
     /**
      * Returns size
      * @return size
+     * @throws ArithmeticException – if the result overflows an int (see {@link Math#multiplyExact(int, int)})
      */
-    public int size() {
+    public int size() throws ArithmeticException {
         int xSpan = maxX - minX + 1;
         int ySpan = maxY - minY + 1;
-        return xSpan * ySpan;
+        return Math.multiplyExact(xSpan, ySpan);
     }
 }
 
