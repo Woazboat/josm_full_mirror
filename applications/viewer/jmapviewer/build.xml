@@ -139,7 +139,7 @@
     <target name="checkstyle" depends="resolve">
         <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties"
             classpathref="checkstyle.classpath"/>
-        <checkstyle config="tools/checkstyle/jmapviewer_checks.xml">
+        <checkstyle config="${basedir}/tools/checkstyle/jmapviewer_checks.xml">
             <!-- Exclude the module-info since checkstyle currently cannot parse it -->
             <fileset dir="${basedir}/src" includes="**/*.java" excludes="module-info.java" />
             <formatter type="xml" toFile="checkstyle-jmapviewer.xml"/>

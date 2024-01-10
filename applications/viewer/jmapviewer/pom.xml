@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.openstreetmap.jmapviewer</groupId>
+    <artifactId>jmapviewer</artifactId>
+    <version>2.19-SNAPSHOT</version>
+
+    <name>JMapViewer</name>
+    <url>https://josm.openstreetmap.de/browser/osm/applications/viewer/jmapviewer</url>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>8</maven.compiler.release>
+        <version.maven.spotbugs>4.8.1.0</version.maven.spotbugs>
+        <version.maven.jacoco>0.8.11</version.maven.jacoco>
+        <sonar.host.url>https://josm.openstreetmap.de/sonar</sonar.host.url>
+        <sonar.projectKey>jmapviewer</sonar.projectKey>
+    </properties>
+    <licenses>
+        <license><!-- Might be GPL-2.0-or-later, but no instances of "or later" in source code -->
+            <name>GPL-2.0-only</name>
+            <url>https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <organization>
+        <name>JOSM</name>
+        <url>https://josm.openstreetmap.de</url>
+    </organization>
+    <contributors>
+        <contributor><name>Tim Haussmann</name></contributor>
+        <contributor><name>Jan Peter Stotz</name></contributor>
+        <contributor><name>Dirk Stöcker</name></contributor>
+        <contributor><name>Stefan Zeller</name></contributor>
+        <contributor><name>Karl Guggisberg</name></contributor>
+        <contributor><name>Dave Hansen</name></contributor>
+        <contributor><name>Ian Dees</name></contributor>
+        <contributor><name>Michael Vigovsky</name></contributor>
+        <contributor><name>Paul Hartmann</name></contributor>
+        <contributor><name>Gleb Smirnoff</name></contributor>
+        <contributor><name>Vincent Privat</name></contributor>
+        <contributor><name>Jason Huntley</name></contributor>
+        <contributor><name>Simon Legner</name></contributor>
+        <contributor><name>Teemu Koskinen</name></contributor>
+        <contributor><name>Jiri Klement</name></contributor>
+        <contributor><name>Matt Hoover</name></contributor>
+        <contributor><name>Alexei Kasatkin</name></contributor>
+        <contributor><name>Galo Higueras</name></contributor>
+        <contributor><name>Wiktor Niesiobędzki</name></contributor>
+        <contributor><name>Robert Scott</name></contributor>
+    </contributors>
+    <scm>
+        <connection>scm:svn:https://josm.openstreetmap.de/osmsvn/applications/viewer/jmapviewer/</connection>
+        <url>https://josm.openstreetmap.de/browser/osm/applications/viewer/jmapviewer/</url>
+    </scm>
+    <issueManagement>
+        <system>Trac</system>
+        <url>https://josm.openstreetmap.de</url>
+    </issueManagement>
+    <mailingLists>
+        <mailingList>
+            <name>josm-dev</name>
+            <archive>https://lists.openstreetmap.org/pipermail/josm-dev/</archive>
+            <post>josm-dev@openstreetmap.org</post>
+        </mailingList>
+    </mailingLists>
+    <distributionManagement>
+        <repository>
+            <id>josm-nexus-releases</id>
+            <name>JOSM Nexus (Releases)</name>
+            <url>https://josm.openstreetmap.de/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>josm-nexus-snapshot</id>
+            <name>JOSM Nexus (Snapshot)</name>
+            <url>https://josm.openstreetmap.de/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.10.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.8.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>${project.basedir}/src</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
+        <finalName>${project.name}-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>${project.build.sourceDirectory}</directory>
+                <includes>
+                    <include>
+                        **/*.png
+                    </include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <outputDirectory>releases/${project.version}</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <outputDirectory>releases/${project.version}</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <release>11</release>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>base-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>8</release>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Start optional plugins (these can be removed by Linux distributions for building) -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.maven.jacoco}</version>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${version.maven.spotbugs}</version>
+                <configuration>
+                    <xmlOutput>true</xmlOutput>
+                    <spotbugsXmlOutputFilename>spotbugs-jmapviewer.xml</spotbugsXmlOutputFilename>
+                    <effort>max</effort>
+                </configuration>
+                <!-- This is commented out until all the current bugs are fixed. TODO uncomment!
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                -->
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <configLocation>${project.basedir}/tools/checkstyle/jmapviewer_checks.xml</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <outputFile>${project.basedir}/checkstyle-jmapviewer.xml</outputFile>
+                    <!-- checkstyle cannot parse module-info.java yet -->
+                    <excludes>module-info.java</excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.2.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.maven.jacoco}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+</project>

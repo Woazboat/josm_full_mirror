@@ -112,7 +112,7 @@ JMapViewer Checkstyle rules
     <property name="lineSeparator" value="lf"/>
   </module>
   <module name="SuppressionFilter">
-    <property name="file" value="${basedir}/tools/checkstyle/jmapviewer_filters.xml"/>
+    <property name="file" value="tools/checkstyle/jmapviewer_filters.xml"/>
     <property name="optional" value="true"/>
   </module>
   <module name="SuppressWithPlainTextCommentFilter">
