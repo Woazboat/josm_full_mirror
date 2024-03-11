@@ -187,9 +187,9 @@
                 <path refid="test.classpath"/>
             </classpath>
         </javac>
-        <jacoco:agent destfile="report/jacoco.exec" enabled="${coverage}" includes="${jacoco.includes}" dumponexit="true"
+        <jacoco:agent destfile="report/jacoco.exec" enabled="${coverageByDefault}" includes="${jacoco.includes}" dumponexit="true"
                       inclbootstrapclasses="${jacoco.inclbootstrapclasses}" inclnolocationclasses="${jacoco.inclnolocationclasses}"
-                      property="jacocoagent" if:true="${coverage}"/>
+                      property="jacocoagent" if:true="${coverageByDefault}"/>
         <junitlauncher printsummary="yes">
             <classpath>
                 <path refid="testlib.classpath"/>
