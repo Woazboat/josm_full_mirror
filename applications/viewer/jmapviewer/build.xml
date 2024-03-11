@@ -187,8 +187,9 @@
                 <path refid="test.classpath"/>
             </classpath>
         </javac>
-        <jacoco:agent enabled="@{coverage}" includes="${jacoco.includes}"
-                      inclbootstrapclasses="${jacoco.inclbootstrapclasses}" inclnolocationclasses="${jacoco.inclnolocationclasses}" property="jacocoagent@{testfamily}@{testITsuffix}" if:true="@{coverage}"/>
+        <jacoco:agent destfile="report/jacoco.exec" enabled="${coverage}" includes="${jacoco.includes}" dumponexit="true"
+                      inclbootstrapclasses="${jacoco.inclbootstrapclasses}" inclnolocationclasses="${jacoco.inclnolocationclasses}"
+                      property="jacocoagent" if:true="${coverage}"/>
         <junitlauncher printsummary="yes">
             <classpath>
                 <path refid="testlib.classpath"/>
@@ -198,6 +199,7 @@
             <testclasses outputdir="report">
                 <fileset dir="bintest" includes="**/*Test.class"/>
                 <fork>
+                    <jvmarg value="${jacocoagent}" if:set="jacocoagent" />
                     <jvmarg value="-Dfile.encoding=UTF-8"/>
                 </fork>
                 <listener type="legacy-brief" sendSysOut="true" sendSysErr="true"/>
@@ -205,6 +207,20 @@
                 <listener type="legacy-xml" />
             </testclasses>
         </junitlauncher>
+        <jacoco:report>
+            <executiondata>
+                <fileset dir="report" includes="*.exec"/>
+            </executiondata>
+            <structure name="JMapViewer Test Coverage">
+                <classfiles>
+                    <fileset dir="bin" includes="org/openstreetmap/"/>
+                </classfiles>
+                <sourcefiles encoding="UTF-8">
+                    <fileset dir="src" includes="org/openstreetmap/"/>
+                </sourcefiles>
+            </structure>
+            <xml destfile="report/jacoco.xml"/>
+        </jacoco:report>
     </target>
 
 </project>
