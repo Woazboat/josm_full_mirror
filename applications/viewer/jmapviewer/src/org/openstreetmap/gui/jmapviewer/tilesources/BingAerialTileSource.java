@@ -31,6 +31,7 @@ import javax.xml.xpath.XPathFactory;
 import org.openstreetmap.gui.jmapviewer.Coordinate;
 import org.openstreetmap.gui.jmapviewer.FeatureAdapter;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
+import org.openstreetmap.gui.jmapviewer.JMapViewerRuntimeException;
 import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -61,15 +62,15 @@ public class BingAerialTileSource extends TMSTileSource {
             "https://dev.virtualearth.net/REST/v1/Imagery/Metadata/{layer}?include=ImageryProviders&output=xml&key=" + API_KEY_PLACEHOLDER;
     /** Original Bing API key created by Potlatch2 developers in 2010 */
     private static final String API_KEY = "Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU";
-    
+
+    private static final Pattern PATTERN_SUBDOMAIN = Pattern.compile("\\{subdomain}");
+    private static final Pattern PATTERN_QUADKEY = Pattern.compile("\\{quadkey}");
+    private static final Pattern PATTERN_CULTURE = Pattern.compile("\\{culture}");
+
     private volatile Future<List<Attribution>> attributions; // volatile is required for getAttribution(), see below.
     private String imageUrlTemplate;
     private int imageryZoomMax = Integer.MIN_VALUE;
     private String[] subdomains;
-
-    private static final Pattern subdomainPattern = Pattern.compile("\\{subdomain}");
-    private static final Pattern quadkeyPattern = Pattern.compile("\\{quadkey}");
-    private static final Pattern culturePattern = Pattern.compile("\\{culture}");
     private String brandLogoUri;
     private String layer = "Aerial";
 
@@ -107,8 +108,8 @@ public class BingAerialTileSource extends TMSTileSource {
         String subdomain = subdomains[t];
 
         String url = imageUrlTemplate;
-        url = subdomainPattern.matcher(url).replaceAll(subdomain);
-        url = quadkeyPattern.matcher(url).replaceAll(computeQuadTree(zoom, tilex, tiley));
+        url = PATTERN_SUBDOMAIN.matcher(url).replaceAll(subdomain);
+        url = PATTERN_QUADKEY.matcher(url).replaceAll(computeQuadTree(zoom, tilex, tiley));
 
         return url;
     }
@@ -288,7 +289,7 @@ public class BingAerialTileSource extends TMSTileSource {
         try {
             return attributions.get();
         } catch (ExecutionException ex) {
-            throw new RuntimeException(ex);
+            throw new JMapViewerRuntimeException(ex);
         } catch (InterruptedException ign) {
             LOG.log(Level.SEVERE, "InterruptedException: {0}", ign.getMessage());
             LOG.log(Level.FINE, ign.getMessage(), ign);
@@ -318,7 +319,7 @@ public class BingAerialTileSource extends TMSTileSource {
     private void setImageUrlTemplate(String template) {
         String noHttpTemplate = template.replace("http://ecn.{subdomain}.tiles.virtualearth.net/",
                 "https://ecn.{subdomain}.tiles.virtualearth.net/");
-        this.imageUrlTemplate = culturePattern.matcher(noHttpTemplate).replaceAll(Locale.getDefault().toString());
+        this.imageUrlTemplate = PATTERN_CULTURE.matcher(noHttpTemplate).replaceAll(Locale.getDefault().toString());
     }
 
     private void setImageryZoomMax(int maxZoom) {

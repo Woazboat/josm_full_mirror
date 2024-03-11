@@ -57,7 +57,7 @@ public class OsmMercator {
      * @return number of pixels
      */
     public long getMaxPixels(int aZoomlevel) {
-        return tileSize * (1 << aZoomlevel);
+        return tileSize * (1L << aZoomlevel);
     }
 
     public long falseEasting(int aZoomlevel) {
@@ -161,7 +161,7 @@ public class OsmMercator {
         double log = Math.log((1.0 + sinLat) / (1.0 - sinLat));
         long mp = getMaxPixels(aZoomlevel);
         double y = mp * (0.5 - (log / (4.0 * Math.PI)));
-        return Math.min(y, mp - 1);
+        return Math.min(y, mp - 1d);
     }
 
     /**

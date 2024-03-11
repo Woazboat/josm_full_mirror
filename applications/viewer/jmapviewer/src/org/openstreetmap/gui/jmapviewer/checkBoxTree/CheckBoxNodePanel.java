@@ -32,7 +32,7 @@ public class CheckBoxNodePanel extends JPanel {
             check.getModel().setPressed(true);
             check.getModel().setArmed(true);
         } else {
-            check.setSelected(bool.booleanValue());
+            check.setSelected(bool);
             check.getModel().setArmed(false);
         }
     }

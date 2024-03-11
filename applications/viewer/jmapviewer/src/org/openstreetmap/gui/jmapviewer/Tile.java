@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 
@@ -83,7 +84,7 @@ public class Tile {
         try {
             return FeatureAdapter.readImage(JMapViewer.class.getResource(path));
         } catch (IOException | IllegalArgumentException ex) {
-            ex.printStackTrace();
+            FeatureAdapter.getLogger(Tile.class).log(Level.SEVERE, ex.getMessage(), ex);
             return null;
         }
     }
@@ -109,7 +110,7 @@ public class Tile {
                 return result;
             } catch (Exception e) {
                 // this should not happen here
-                throw new RuntimeException(e);
+                throw new JMapViewerRuntimeException(e);
             }
         }
     }
@@ -124,12 +125,8 @@ public class Tile {
          *  use LazyTask as creation of BufferedImage is very expensive
          *  this way we can avoid object creation until we're sure it's needed
          */
-        final CachedCallable<BufferedImage> tmpImage = new CachedCallable<>(new Callable<BufferedImage>() {
-            @Override
-            public BufferedImage call() throws Exception {
-                return new BufferedImage(source.getTileSize(), source.getTileSize(), BufferedImage.TYPE_INT_ARGB);
-            }
-        });
+        final CachedCallable<BufferedImage> tmpImage = new CachedCallable<>(() ->
+                new BufferedImage(source.getTileSize(), source.getTileSize(), BufferedImage.TYPE_INT_ARGB));
 
         for (int zoomDiff = 1; zoomDiff < 5; zoomDiff++) {
             // first we check if there are already the 2^x tiles
@@ -145,13 +142,10 @@ public class Tile {
                  * use LazyTask for graphics to avoid evaluation of tmpImage, until we have
                  * something to draw
                  */
-                CachedCallable<Graphics2D> graphics = new CachedCallable<>(new Callable<Graphics2D>() {
-                    @Override
-                    public Graphics2D call() throws Exception {
-                        Graphics2D g = (Graphics2D) tmpImage.call().getGraphics();
-                        g.setTransform(AffineTransform.getScaleInstance(scale, scale));
-                        return g;
-                    }
+                CachedCallable<Graphics2D> graphics = new CachedCallable<>(() -> {
+                    Graphics2D g = (Graphics2D) tmpImage.call().getGraphics();
+                    g.setTransform(AffineTransform.getScaleInstance(scale, scale));
+                    return g;
                 });
 
                 int paintedTileCount = 0;
@@ -176,18 +170,14 @@ public class Tile {
                 int ytileLow = ytile >> zoomDiff;
                 final int factor = 1 << zoomDiff;
                 final double scale = factor;
-                CachedCallable<Graphics2D> graphics = new CachedCallable<>(new Callable<Graphics2D>() {
-                    @Override
-                    public Graphics2D call() throws Exception {
-                        Graphics2D g = (Graphics2D) tmpImage.call().getGraphics();
-                        AffineTransform at = new AffineTransform();
-                        int translateX = (xtile % factor) * source.getTileSize();
-                        int translateY = (ytile % factor) * source.getTileSize();
-                        at.setTransform(scale, 0, 0, scale, -translateX, -translateY);
-                        g.setTransform(at);
-                        return g;
-                    }
-
+                CachedCallable<Graphics2D> graphics = new CachedCallable<>(() -> {
+                    Graphics2D g = (Graphics2D) tmpImage.call().getGraphics();
+                    AffineTransform at = new AffineTransform();
+                    int translateX = (xtile % factor) * source.getTileSize();
+                    int translateY = (ytile % factor) * source.getTileSize();
+                    at.setTransform(scale, 0, 0, scale, -translateX, -translateY);
+                    g.setTransform(at);
+                    return g;
                 });
 
                 Tile tile = cache.getTile(source, xtileLow, ytileLow, zoomLow);
@@ -340,7 +330,7 @@ public class Tile {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null || !(obj instanceof Tile))
+        if (obj == null || !this.getClass().equals(obj.getClass()))
             return false;
         final Tile other = (Tile) obj;
         return xtile == other.xtile

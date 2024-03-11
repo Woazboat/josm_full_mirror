@@ -136,7 +136,7 @@ MouseWheelListener {
                 movementMouseButtonMask = MouseEvent.BUTTON3_DOWN_MASK;
                 break;
             default:
-                throw new RuntimeException("Unsupported button");
+                throw new JMapViewerRuntimeException("Unsupported button");
         }
     }
 

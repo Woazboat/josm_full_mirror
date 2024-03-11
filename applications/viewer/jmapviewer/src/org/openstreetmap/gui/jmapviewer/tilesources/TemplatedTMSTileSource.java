@@ -16,48 +16,50 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TemplatedTileSource;
 /**
  * Handles templated TMS Tile Source. Templated means, that some patterns within
  * URL gets substituted.
- *
+ * <p>
  * Supported parameters
- * {zoom} - substituted with zoom level
- * {z} - as above
- * {NUMBER-zoom} - substituted with result of equation "NUMBER - zoom",
- *                  eg. {20-zoom} for zoom level 15 will result in 5 in this place
- * {zoom+number} - substituted with result of equation "zoom + number",
- *                 eg. {zoom+5} for zoom level 15 will result in 20.
- * {x} - substituted with X tile number
- * {y} - substituted with Y tile number
- * {!y} - substituted with Yahoo Y tile number
- * {-y} - substituted with reversed Y tile number
- * {apikey} - substituted with API key retrieved for the imagery id
- * {switch:VAL_A,VAL_B,VAL_C,...} - substituted with one of VAL_A, VAL_B, VAL_C. Usually
- *                                  used to specify many tile servers
- * {header:(HEADER_NAME,HEADER_VALUE)} - sets the headers to be sent to tile server
+ * <ul>
+ * <li>{zoom} - substituted with zoom level</li>
+ * <li>{z} - as above</li>
+ * <li>{NUMBER-zoom} - substituted with result of equation "NUMBER - zoom",
+ *                  eg. {20-zoom} for zoom level 15 will result in 5 in this place</li>
+ * <li>{zoom+number} - substituted with result of equation "zoom + number",
+ *                 eg. {zoom+5} for zoom level 15 will result in 20.</li>
+ * <li>{x} - substituted with X tile number</li>
+ * <li>{y} - substituted with Y tile number</li>
+ * <li>{!y} - substituted with Yahoo Y tile number</li>
+ * <li>{-y} - substituted with reversed Y tile number</li>
+ * <li>{apikey} - substituted with API key retrieved for the imagery id</li>
+ * <li>{switch:VAL_A,VAL_B,VAL_C,...} - substituted with one of VAL_A, VAL_B, VAL_C. Usually
+ *                                  used to specify many tile servers</li>
+ * <li>{header:(HEADER_NAME,HEADER_VALUE)} - sets the headers to be sent to tile server</li>
+ * </ul>
  */
 public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTileSource {
 
-    private Random rand;
-    private String[] randomParts;
-    private final Map<String, String> headers = new HashMap<>();
-    private boolean inverse_zoom = false;
-    private int zoom_offset = 0;
-
     // CHECKSTYLE.OFF: SingleSpaceSeparator
     private static final String COOKIE_HEADER   = "Cookie";
-    private static final Pattern PATTERN_ZOOM    = Pattern.compile("\\{(?:(\\d+)-)?z(?:oom)?([+-]\\d+)?\\}");
-    private static final Pattern PATTERN_X       = Pattern.compile("\\{x\\}");
-    private static final Pattern PATTERN_Y       = Pattern.compile("\\{y\\}");
-    private static final Pattern PATTERN_Y_YAHOO = Pattern.compile("\\{!y\\}");
-    private static final Pattern PATTERN_NEG_Y   = Pattern.compile("\\{-y\\}");
-    private static final Pattern PATTERN_SWITCH  = Pattern.compile("\\{switch:([^}]+)\\}");
-    private static final Pattern PATTERN_HEADER  = Pattern.compile("\\{header\\(([^,]+),([^}]+)\\)\\}");
-    private static final Pattern PATTERN_API_KEY = Pattern.compile("\\{apikey\\}");
-    private static final Pattern PATTERN_PARAM  = Pattern.compile("\\{((?:\\d+-)?z(?:oom)?(:?[+-]\\d+)?|x|y|!y|-y|switch:([^}]+))\\}");
+    private static final Pattern PATTERN_ZOOM    = Pattern.compile("\\{(?:(\\d+)-)?z(?:oom)?([+-]\\d+)?}");
+    private static final Pattern PATTERN_X       = Pattern.compile("\\{x}");
+    private static final Pattern PATTERN_Y       = Pattern.compile("\\{y}");
+    private static final Pattern PATTERN_Y_YAHOO = Pattern.compile("\\{!y}");
+    private static final Pattern PATTERN_NEG_Y   = Pattern.compile("\\{-y}");
+    private static final Pattern PATTERN_SWITCH  = Pattern.compile("\\{switch:([^}]+)}");
+    private static final Pattern PATTERN_HEADER  = Pattern.compile("\\{header\\(([^,]+),([^}]+)\\)}");
+    private static final Pattern PATTERN_API_KEY = Pattern.compile("\\{apikey}");
+    private static final Pattern PATTERN_PARAM  = Pattern.compile("\\{((?:\\d+-)?z(?:oom)?(:?[+-]\\d+)?|x|y|!y|-y|switch:([^}]+))}");
 
     // CHECKSTYLE.ON: SingleSpaceSeparator
 
     private static final Pattern[] ALL_PATTERNS = {
-        PATTERN_HEADER, PATTERN_ZOOM, PATTERN_X, PATTERN_Y, PATTERN_Y_YAHOO, PATTERN_NEG_Y, PATTERN_SWITCH, PATTERN_API_KEY
+            PATTERN_HEADER, PATTERN_ZOOM, PATTERN_X, PATTERN_Y, PATTERN_Y_YAHOO, PATTERN_NEG_Y, PATTERN_SWITCH, PATTERN_API_KEY
     };
+
+    private Random rand;
+    private String[] randomParts;
+    private final Map<String, String> headers = new HashMap<>();
+    private boolean inverse_zoom;
+    private int zoom_offset;
 
     /**
      * Creates Templated TMS Tile Source based on ImageryInfo
@@ -136,7 +138,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
             switch (matcher.group(1)) {
             case "z": // PATTERN_ZOOM
             case "zoom":
-                replacement = Integer.toString((inverse_zoom ? -1 * zoom : zoom) + zoom_offset);
+                replacement = Integer.toString((inverse_zoom ? -zoom : zoom) + zoom_offset);
                 break;
             case "x": // PATTERN_X
                 replacement = Integer.toString(tilex);
@@ -145,7 +147,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
                 replacement = Integer.toString(tiley);
                 break;
             case "!y": // PATTERN_Y_YAHOO
-                replacement = Integer.toString((int) Math.pow(2, zoom-1)-1-tiley);
+                replacement = Integer.toString((int) Math.pow(2, zoom - 1d) - 1 - tiley);
                 break;
             case "-y": // PATTERN_NEG_Y
                 replacement = Integer.toString((int) Math.pow(2, zoom)-1-tiley);
@@ -156,7 +158,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
             default:
                 // handle switch/zoom here, as group will contain parameters and switch will not work
                 if (PATTERN_ZOOM.matcher("{" + matcher.group(1) + "}").matches()) {
-                    replacement = Integer.toString((inverse_zoom ? -1 * zoom : zoom) + zoom_offset);
+                    replacement = Integer.toString((inverse_zoom ? -zoom : zoom) + zoom_offset);
                 } else if (PATTERN_SWITCH.matcher("{" + matcher.group(1) + "}").matches()) {
                     replacement = getRandomPart(randomParts);
                 } else {
@@ -179,7 +181,7 @@ public class TemplatedTMSTileSource extends TMSTileSource implements TemplatedTi
      */
     public static void checkUrl(String url) {
         assert url != null && !"".equals(url) : "URL cannot be null or empty";
-        Matcher m = Pattern.compile("\\{[^}]*\\}").matcher(url);
+        Matcher m = Pattern.compile("\\{[^}]*}").matcher(url);
         while (m.find()) {
             boolean isSupportedPattern = Arrays.stream(ALL_PATTERNS).anyMatch(pattern -> pattern.matcher(m.group()).matches());
             if (!isSupportedPattern) {

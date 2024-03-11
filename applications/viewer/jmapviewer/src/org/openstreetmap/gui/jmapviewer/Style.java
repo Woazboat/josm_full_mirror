@@ -7,13 +7,13 @@ import java.awt.Font;
 import java.awt.Stroke;
 
 public class Style {
+    private static final AlphaComposite TRANSPARENCY = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
+    private static final AlphaComposite OPAQUE = AlphaComposite.getInstance(AlphaComposite.SRC);
+
     private Color color;
     private Color backColor;
     private Stroke stroke;
     private Font font;
-
-    private static final AlphaComposite TRANSPARENCY = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
-    private static final AlphaComposite OPAQUE = AlphaComposite.getInstance(AlphaComposite.SRC);
 
     public Style() {
         super();

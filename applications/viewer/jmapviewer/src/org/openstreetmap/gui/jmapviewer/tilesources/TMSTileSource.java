@@ -74,8 +74,8 @@ public class TMSTileSource extends AbstractTMSTileSource {
     @Override
     public ICoordinate tileXYToLatLon(int x, int y, int zoom) {
         return new Coordinate(
-                osmMercator.yToLat(y * getTileSize(), zoom),
-                osmMercator.xToLon(x * getTileSize(), zoom)
+                osmMercator.yToLat((long) y * getTileSize(), zoom),
+                osmMercator.xToLon((long) x * getTileSize(), zoom)
                 );
     }
 

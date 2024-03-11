@@ -298,10 +298,8 @@ public final class FeatureAdapter {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 try {
                     Desktop.getDesktop().browse(new URI(url));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
+                } catch (IOException | URISyntaxException e) {
+                    getLogger(FeatureAdapter.class).log(Level.SEVERE, e.getMessage(), e);
                 }
             } else {
                 getLogger(FeatureAdapter.class).log(Level.SEVERE, tr("Opening link not supported on current platform (''{0}'')", url));

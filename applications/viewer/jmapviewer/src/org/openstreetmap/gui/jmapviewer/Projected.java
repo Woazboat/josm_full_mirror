@@ -61,7 +61,7 @@ public class Projected implements IProjected, Serializable {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!(obj instanceof Projected))
+        if (obj == null || !this.getClass().equals(obj.getClass()))
             return false;
         final Projected other = (Projected) obj;
         return Objects.equals(data, other.data);

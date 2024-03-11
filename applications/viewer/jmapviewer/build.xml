@@ -7,26 +7,16 @@
 
     <property name="java.lang.version" value="8" />
     <dirname property="base.dir" file="${ant.file.jmapviewer}"/>
-    <property name="tools.dir" location="${base.dir}/tools"/>
     <property name="jacoco.includes" value="org.openstreetmap.gui.jmapviewer.*" />
     <property name="jacoco.inclbootstrapclasses" value="false" />
     <property name="jacoco.inclnolocationclasses" value="false" />
     <!-- For Java specific stuff by version -->
     <condition property="isJava9"><matches string="${ant.java.version}" pattern="(1.)?(9|1[0-9])" /></condition>
-    <condition property="isJava10"><matches string="${ant.java.version}" pattern="(1|2)[0-9]" /></condition>
-    <condition property="isJava11"><matches string="${ant.java.version}" pattern="1[1-9]|[2-9][0-9]" /></condition>
-    <condition property="isJava12"><matches string="${ant.java.version}" pattern="1[2-9]|[2-9][0-9]" /></condition>
-    <condition property="isJava13"><matches string="${ant.java.version}" pattern="1[3-9]|[2-9][0-9]" /></condition>
-    <condition property="isJava14"><matches string="${ant.java.version}" pattern="1[4-9]|[2-9][0-9]" /></condition>
-    <condition property="isJava16"><matches string="${ant.java.version}" pattern="1[6-9]|[2-9][0-9]" /></condition>
-    <condition property="isJava18"><matches string="${ant.java.version}" pattern="1[8-9]|[2-9][0-9]" /></condition>
-    <condition property="isJava19"><matches string="${ant.java.version}" pattern="19|[2-9][0-9]" /></condition>
-    <condition property="isJava20"><matches string="${ant.java.version}" pattern="[2-9][0-9]" /></condition>
-    <condition property="isJava21"><matches string="${ant.java.version}" pattern="2[1-9]|[3-9][0-9]" /></condition>
-    <!-- Disable jacoco on Java 18+, see https://github.com/jacoco/jacoco/pull/1132 -->
+    <condition property="isJava23"><matches string="${ant.java.version}" pattern="2[3-9]|[3-9][0-9]" /></condition>
+    <!-- Disable jacoco 0.8.11 on Java 23+, see https://www.jacoco.org/jacoco/trunk/doc/changes.html for latest supported version -->
     <condition property="coverageByDefault">
         <not>
-            <isset property="isJava18"/>
+            <isset property="isJava23"/>
         </not>
     </condition>
     <path id="test.classpath">

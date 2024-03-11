@@ -4,8 +4,6 @@ package org.openstreetmap.gui.jmapviewer;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Point;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -83,20 +81,10 @@ public class Demo extends JFrame implements JMapViewerEventListener {
                 new OsmTileSource.TransportMap(),
                 new BingAerialTileSource(),
         });
-        tileSourceSelector.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                map().setTileSource((TileSource) e.getItem());
-            }
-        });
+        tileSourceSelector.addItemListener(e -> map().setTileSource((TileSource) e.getItem()));
         JComboBox<TileLoader> tileLoaderSelector;
         tileLoaderSelector = new JComboBox<>(new TileLoader[] {new OsmTileLoader(map())});
-        tileLoaderSelector.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                map().setTileLoader((TileLoader) e.getItem());
-            }
-        });
+        tileLoaderSelector.addItemListener(e -> map().setTileLoader((TileLoader) e.getItem()));
         map().setTileLoader((TileLoader) tileLoaderSelector.getSelectedItem());
         panelTop.add(tileSourceSelector);
         panelTop.add(tileLoaderSelector);

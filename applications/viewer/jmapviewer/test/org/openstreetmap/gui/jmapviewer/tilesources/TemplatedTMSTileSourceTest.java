@@ -7,25 +7,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for TemplaedTMSTileSource
+ * Tests for TemplatedTMSTileSource
  */
 public class TemplatedTMSTileSourceTest {
 
-    private static final Collection<String> TMS_IMAGERIES = Arrays.asList(new String[]{
-            "http://imagico.de/map/osmim_tiles.php?layer=S2A_R136_N41_20150831T093006&z={zoom}&x={x}&y={-y}",
+    private static final Collection<String> TMS_IMAGERIES = Collections.singleton("http://imagico.de/map/osmim_tiles.php?layer=S2A_R136_N41_20150831T093006&z={zoom}&x={x}&y={-y}"
             /*
              *  generate for example with:
              *  $ curl https://josm.openstreetmap.de/maps | \
              *    xmlstarlet sel -N 'josm=http://josm.openstreetmap.de/maps-1.0' -t -v "//josm:entry[josm:type='tms']/josm:url" -n  | \
              *    sed -e 's/\&amp;/\&/g' -e 's/^/"/' -e 's/$/",/'
-             */
-    });
+             */);
 
     /**
      * triple of:

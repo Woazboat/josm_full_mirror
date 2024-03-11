@@ -3,6 +3,7 @@ package org.openstreetmap.gui.jmapviewer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openstreetmap.gui.jmapviewer.interfaces.TileCache;
@@ -17,7 +18,12 @@ import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
  */
 public class MemoryTileCache implements TileCache {
 
-    protected static final Logger log = Logger.getLogger(MemoryTileCache.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MemoryTileCache.class.getName());
+    /**
+     * @deprecated since 2.20 (create a class specific logger)
+     */
+    @Deprecated
+    protected static final Logger log = LOGGER;
 
     /**
      * Default cache size
@@ -78,7 +84,7 @@ public class MemoryTileCache implements TileCache {
                 removeEntry(lruTiles.getLastElement());
             }
         } catch (NullPointerException e) {
-            log.warning(e.getMessage());
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
 

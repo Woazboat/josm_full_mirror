@@ -18,14 +18,14 @@ import org.openstreetmap.gui.jmapviewer.interfaces.Attributed;
 import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 
 public class AttributionSupport {
+    public static final Font ATTR_FONT = new Font("Arial", Font.PLAIN, 10);
+    public static final Font ATTR_LINK_FONT;
 
     private Attributed source;
 
     private Image attrImage;
     private String attrTermsText;
     private String attrTermsUrl;
-    public static final Font ATTR_FONT = new Font("Arial", Font.PLAIN, 10);
-    public static final Font ATTR_LINK_FONT;
 
     protected Rectangle attrTextBounds;
     protected Rectangle attrToUBounds;

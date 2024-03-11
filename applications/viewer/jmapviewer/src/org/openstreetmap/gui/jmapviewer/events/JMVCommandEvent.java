@@ -16,11 +16,12 @@ public class JMVCommandEvent extends EventObject {
         ZOOM
     }
 
-    private COMMAND command;
     /**
      *
      */
     private static final long serialVersionUID = 8701544867914969620L;
+
+    private COMMAND command;
 
     public JMVCommandEvent(COMMAND cmd, Object source) {
         super(source);

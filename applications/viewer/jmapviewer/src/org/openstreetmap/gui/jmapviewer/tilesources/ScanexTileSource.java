@@ -13,19 +13,24 @@ import org.openstreetmap.gui.jmapviewer.interfaces.ICoordinate;
 
 /**
  * This tilesource uses different to OsmMercator projection.
- *
+ * <p>
  * Earth is assumed an ellipsoid in this projection, unlike
  * sphere in OsmMercator, so latitude calculation differs a lot.
- *
+ * <p>
  * The longitude calculation is the same as in OsmMercator,
  * we inherit it from AbstractTMSTileSource.
  *
  * TODO: correct getDistance() method.
  */
 public class ScanexTileSource extends TMSTileSource {
-    private static final String DEFAULT_URL = "http://maps.kosmosnimki.ru";
+    private static final String DEFAULT_URL = "https://maps.kosmosnimki.ru";
     private static final int DEFAULT_MAXZOOM = 14;
     private static final String API_KEY = "4018C5A9AECAD8868ED5DEB2E41D09F7";
+
+    // Latitude to Y and back calculations.
+    private static final double RADIUS_E = 6_378_137;   /* radius of Earth at equator, m */
+    private static final double EQUATOR = 40075016.68557849; /* equator length, m */
+    private static final double E = 0.0818191908426;  /* eccentricity of Earth's ellipsoid */
 
     private enum ScanexLayer {
         IRS("irs", "/TileSender.ashx?ModeKey=tile&MapName=F7B8CF651682420FA1749D894C8AD0F6&LayerName=BAC78D764F0443BD9AF93E7A998C9F5B");
@@ -49,7 +54,7 @@ public class ScanexTileSource extends TMSTileSource {
 
     /** IRS by default */
     private ScanexLayer layer = ScanexLayer.IRS;
-    private TemplatedTMSTileSource TemplateSource = null;
+    private TemplatedTMSTileSource templateSource;
 
     /** cached latitude used in {@link #tileYToLat(double, int)} */
     private double cachedLat;
@@ -62,10 +67,10 @@ public class ScanexTileSource extends TMSTileSource {
         super(info);
         String url = info.getUrl();
 
-        /**
+        /*
          * The formulae in tileYToLat() and latToTileY() have 2^8
          * hardcoded in them, so explicitly state that.  For now
-         * the assignment matches OsmMercator.DEFAUL_TILE_SIZE, and
+         * the assignment matches OsmMercator.DEFAULT_TILE_SIZE, and
          * thus is extraneous.  But let it be there just in case if
          * OsmMercator changes.
          */
@@ -81,9 +86,9 @@ public class ScanexTileSource extends TMSTileSource {
                 return;
             }
         }
-        /** If not "irs" or "spot" keyword, then a custom URL. */
+        /* If not "irs" or "spot" keyword, then a custom URL. */
         TemplatedTMSTileSource.checkUrl(info.getUrl());
-        this.TemplateSource = new TemplatedTMSTileSource(info);
+        this.templateSource = new TemplatedTMSTileSource(info);
     }
 
     @Override
@@ -93,26 +98,21 @@ public class ScanexTileSource extends TMSTileSource {
 
    @Override
     public String getTileUrl(int zoom, int tilex, int tiley) {
-        if (this.TemplateSource != null)
-            return this.TemplateSource.getTileUrl(zoom, tilex, tiley);
+        if (this.templateSource != null)
+            return this.templateSource.getTileUrl(zoom, tilex, tiley);
         else
             return this.getBaseUrl() + getTilePath(zoom, tilex, tiley);
     }
 
     @Override
     public String getTilePath(int zoom, int tilex, int tiley) {
-        int tmp = (int) Math.pow(2.0, zoom - 1);
+        int tmp = (int) Math.pow(2.0, zoom - 1d);
 
         tilex = tilex - tmp;
         tiley = tmp - tiley - 1;
 
         return this.layer.getUri() + "&apikey=" + API_KEY + "&x=" + tilex + "&y=" + tiley + "&z=" + zoom;
     }
-
-    // Latitude to Y and back calculations.
-    private static final double RADIUS_E = 6378137;   /* radius of Earth at equator, m */
-    private static final double EQUATOR = 40075016.68557849; /* equator length, m */
-    private static final double E = 0.0818191908426;  /* eccentricity of Earth's ellipsoid */
 
     @Override
     public Point latLonToXY(double lat, double lon, int zoom) {
@@ -142,11 +142,11 @@ public class ScanexTileSource extends TMSTileSource {
     public ICoordinate tileXYToLatLon(int x, int y, int zoom) {
         return new Coordinate(
                 tileYToLat(y, zoom),
-                osmMercator.xToLon(x * getTileSize(), zoom)
+                osmMercator.xToLon((long) x * getTileSize(), zoom)
                 );
     }
 
-    private double latToTileY(double lat, int zoom) {
+    private static double latToTileY(double lat, int zoom) {
         double tmp = Math.tan(Math.PI/4 * (1 + lat/90));
         double pow = Math.pow(Math.tan(Math.PI/4 + Math.asin(E * Math.sin(Math.toRadians(lat)))/2), E);
 
@@ -182,7 +182,7 @@ public class ScanexTileSource extends TMSTileSource {
         double sinl = Math.sin(lat);
         double cosl = Math.cos(lat);
 
-        zoom = (int) Math.pow(2.0, zoom - 1);
+        zoom = (int) Math.pow(2.0, zoom - 1d);
         double ec = Math.exp((1 - y/zoom)*Math.PI);
 
         double f = Math.tan(Math.PI/4+lat/2) -

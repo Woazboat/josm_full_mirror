@@ -178,9 +178,9 @@ public abstract class AbstractTMSTileSource extends AbstractTileSource {
                 int j = 0;
                 for (final int v : byteDigest) {
                     int vn = (v & 0xf0) >> 4;
-                    hexChars[j++] = (char) (vn + (vn >= 10 ? 'a' - 10 : '0'));
+                    hexChars[j++] = (char) (vn + (vn >= 10 ? ('a' - 10) : '0'));
                     vn = (v & 0xf);
-                    hexChars[j++] = (char) (vn + (vn >= 10 ? 'a' - 10 : '0'));
+                    hexChars[j++] = (char) (vn + (vn >= 10 ? ('a' - 10) : '0'));
                 }
                 for (String val: searchEntry.getValue()) {
                     if (new String(hexChars).equalsIgnoreCase(val)) {

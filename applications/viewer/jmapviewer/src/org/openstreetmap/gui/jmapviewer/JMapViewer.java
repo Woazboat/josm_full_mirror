@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -136,9 +137,9 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
     public JMapViewer(TileCache tileCache) {
         tileSource = new OsmTileSource.Mapnik();
         tileController = new TileController(tileSource, tileCache, this);
-        mapMarkerList = Collections.synchronizedList(new ArrayList<MapMarker>());
-        mapPolygonList = Collections.synchronizedList(new ArrayList<MapPolygon>());
-        mapRectangleList = Collections.synchronizedList(new ArrayList<MapRectangle>());
+        mapMarkerList = Collections.synchronizedList(new ArrayList<>());
+        mapPolygonList = Collections.synchronizedList(new ArrayList<>());
+        mapRectangleList = Collections.synchronizedList(new ArrayList<>());
         mapMarkersVisible = true;
         mapRectanglesVisible = true;
         mapPolygonsVisible = true;
@@ -196,7 +197,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
             try {
                 return new ImageIcon(FeatureAdapter.readImage(url));
             } catch (IOException e) {
-                e.printStackTrace();
+                FeatureAdapter.getLogger(JMapViewer.class).log(Level.FINE, e.getMessage(), e);
             }
         }
         return null;
@@ -501,7 +502,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
             return (int) marker.getRadius();
         else if (p != null) {
             Integer radius = getLatOffset(marker.getLat(), marker.getLon(), marker.getRadius(), false);
-            radius = radius == null ? null : p.y - radius;
+            radius = radius == null ? null : (p.y - radius);
             return radius;
         } else
             return null;
@@ -542,12 +543,12 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
      */
     public double getMeterPerPixel() {
         Point origin = new Point(5, 5);
-        Point center = new Point(getWidth() / 2, getHeight() / 2);
+        Point centerPixel = new Point(getWidth() / 2, getHeight() / 2);
 
-        double pDistance = center.distance(origin);
+        double pDistance = centerPixel.distance(origin);
 
         ICoordinate originCoord = getPosition(origin);
-        ICoordinate centerCoord = getPosition(center);
+        ICoordinate centerCoord = getPosition(centerPixel);
 
         double mDistance = tileSource.getDistance(originCoord.getLat(), originCoord.getLon(),
                 centerCoord.getLat(), centerCoord.getLon());
@@ -559,7 +560,7 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        int iMove = 0;
+        int iMove;
 
         int tilesize = tileSource.getTileSize();
         int tilex = center.x / tilesize;
@@ -1100,9 +1101,9 @@ public class JMapViewer extends JPanel implements TileLoaderListener {
      */
     public void setTileSource(TileSource tileSource) {
         if (tileSource.getMaxZoom() > MAX_ZOOM)
-            throw new RuntimeException("Maximum zoom level too high");
+            throw new JMapViewerRuntimeException("Maximum zoom level too high");
         if (tileSource.getMinZoom() < MIN_ZOOM)
-            throw new RuntimeException("Minimum zoom level too low");
+            throw new JMapViewerRuntimeException("Minimum zoom level too low");
         ICoordinate position = getPosition();
         this.tileSource = tileSource;
         tileController.setTileSource(tileSource);

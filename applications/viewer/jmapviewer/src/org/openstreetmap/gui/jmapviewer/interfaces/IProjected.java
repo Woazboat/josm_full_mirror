@@ -3,7 +3,7 @@ package org.openstreetmap.gui.jmapviewer.interfaces;
 
 /**
  * Projected coordinates (east / north space).
- *
+ * <p>
  * For most projections, one unit in projected space is roughly one meter, but
  * can also be degrees or feet.
  */

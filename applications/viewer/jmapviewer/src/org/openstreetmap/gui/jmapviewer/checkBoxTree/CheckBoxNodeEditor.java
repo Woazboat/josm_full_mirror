@@ -2,7 +2,6 @@
 package org.openstreetmap.gui.jmapviewer.checkBoxTree;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -84,13 +83,9 @@ public class CheckBoxNodeEditor extends AbstractCellEditor implements TreeCellEd
                 row, true);
 
         // editor always selected / focused
-        final ItemListener itemListener = new ItemListener() {
-
-            @Override
-            public void itemStateChanged(final ItemEvent itemEvent) {
-                if (stopCellEditing()) {
-                    fireEditingStopped();
-                }
+        final ItemListener itemListener = itemEvent -> {
+            if (stopCellEditing()) {
+                fireEditingStopped();
             }
         };
         if (editor instanceof CheckBoxNodePanel) {

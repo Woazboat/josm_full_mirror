@@ -31,7 +31,7 @@ public class OsmTileSource {
 
         @Override
         public String getBaseUrl() {
-            String url = String.format(this.baseUrl, new Object[] {SERVER[serverNum]});
+            String url = String.format(this.baseUrl, SERVER[serverNum]);
             serverNum = (serverNum + 1) % SERVER.length;
             return url;
         }
@@ -57,15 +57,15 @@ public class OsmTileSource {
 
         @Override
         public String getBaseUrl() {
-            String url = String.format(this.baseUrl, new Object[] {SERVER[serverNum]});
+            String url = String.format(this.baseUrl, SERVER[serverNum]);
             serverNum = (serverNum + 1) % SERVER.length;
             return url;
         }
 
         /**
          * Get the thunderforest API key.
-         *
-         * Needs to be registered at their web site.
+         * <p>
+         * Needs to be registered at their website.
          * @return the API key
          */
         protected abstract String getApiKey();
