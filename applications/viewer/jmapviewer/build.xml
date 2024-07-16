@@ -2,11 +2,13 @@
 <project default="all" name="jmapviewer"
          xmlns:jacoco="antlib:org.jacoco.ant"
          xmlns:if="ant:if"
-         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:mvn="antlib:org.apache.maven.resolver.ant"
 >
 
     <property name="java.lang.version" value="8" />
     <dirname property="base.dir" file="${ant.file.jmapviewer}"/>
+    <property name="maven.artifact.resolver.version" value="1.5.1"/>
+    <property name="maven.artifact.resolver.parent.dir" value="${user.home}/.m2/repository/org/apache/maven/resolver/maven-resolver-ant-tasks/${maven.artifact.resolver.version}/"/>
     <property name="jacoco.includes" value="org.openstreetmap.gui.jmapviewer.*" />
     <property name="jacoco.inclbootstrapclasses" value="false" />
     <property name="jacoco.inclnolocationclasses" value="false" />
@@ -70,10 +72,6 @@
                 <include name="**/*.png" />
             </fileset>
         </copy>
-    </target>
-
-    <target name="checkdepsupdate" depends="resolve">
-        <ivy:checkdepsupdate/>
     </target>
 
     <target name="svn_info" description="Get SVN info for use in JAR/ZIP filenames.">
@@ -167,12 +165,47 @@
         </javadoc>
     </target>
 
-    <target name="resolve" description="Resolve Ivy dependencies">
-        <ivy:resolve/>
-        <ivy:cachepath pathid="checkstyle.classpath" conf="checkstyle"/>
-        <ivy:cachepath pathid="testlib.classpath" conf="test"/>
-        <ivy:cachepath pathid="jacoco.classpath" conf="jacocoant"/>
-        <ivy:cachepath pathid="spotbugs.classpath" conf="spotbugs"/>
+    <target name="download-artifact-resolver">
+        <mkdir dir="${maven.artifact.resolver.parent.dir}"/>
+        <get src="https://repo1.maven.org/maven2/org/apache/maven/resolver/maven-resolver-ant-tasks/${maven.artifact.resolver.version}/maven-resolver-ant-tasks-${maven.artifact.resolver.version}-uber.jar"
+             dest="${maven.artifact.resolver.parent.dir}/maven-resolver-ant-tasks-${maven.artifact.resolver.version}-uber.jar"
+             usetimestamp="true" />
+    </target>
+    <target name="init-maven" depends="download-artifact-resolver">
+        <path id="maven.lib.path">
+            <fileset dir="${maven.artifact.resolver.parent.dir}" includes="maven-resolver-ant-tasks-${maven.artifact.resolver.version}-uber.jar"/>
+        </path>
+        <taskdef uri="antlib:org.apache.maven.resolver.ant" resource="org/apache/maven/resolver/ant/antlib.xml" classpathref="maven.lib.path"/>
+    </target>
+    <target name="resolve" depends="init-maven" description="Resolve Maven dependencies">
+        <mvn:pom file="pom.xml"/>
+        <!-- This stanza is necessary since the maven resolver doesn't read repo settings from the pom.xml file -->
+        <!-- resolver.repositories makes it global -->
+        <mvn:remoterepos id="resolver.repositories">
+            <mvn:remoterepo id="JOSM-central" url="https://josm.openstreetmap.de/nexus/content/repositories/central/" />
+        </mvn:remoterepos>
+        <mvn:resolve>
+            <mvn:path refid="testlib.classpath" classpath="test"/>
+        </mvn:resolve>
+        <mvn:resolve>
+            <mvn:dependencies>
+                <mvn:dependency groupId="org.jacoco" artifactId="org.jacoco.ant" version="${pom.properties.version.maven.jacoco}" classifier="nodeps" type="jar" scope="test"/>
+            </mvn:dependencies>
+            <mvn:path refid="jacoco.classpath" classpath="test"/>
+        </mvn:resolve>
+        <mvn:resolve>
+            <mvn:dependencies>
+                <mvn:dependency groupId="com.puppycrawl.tools" artifactId="checkstyle" version="${pom.properties.version.maven.checkstyle}" scope="compile"/>
+            </mvn:dependencies>
+            <mvn:path refid="checkstyle.classpath" classpath="compile"/>
+        </mvn:resolve>
+        <mvn:resolve>
+            <mvn:dependencies>
+                <mvn:dependency groupId="com.github.spotbugs" artifactId="spotbugs" version="${pom.properties.version.maven.spotbugs}" scope="compile"/>
+                <mvn:dependency groupId="com.github.spotbugs" artifactId="spotbugs-ant" version="${pom.properties.version.maven.spotbugs}" scope="compile"/>
+            </mvn:dependencies>
+            <mvn:path refid="spotbugs.classpath" classpath="compile"/>
+        </mvn:resolve>
     </target>
 
     <target name="test" depends="clean, build, resolve">
