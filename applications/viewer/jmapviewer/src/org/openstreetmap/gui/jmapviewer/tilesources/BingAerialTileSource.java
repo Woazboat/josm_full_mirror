@@ -4,6 +4,8 @@ package org.openstreetmap.gui.jmapviewer.tilesources;
 import java.awt.Image;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,9 +129,15 @@ public class BingAerialTileSource extends TMSTileSource {
     }
 
     protected URL getAttributionUrl() throws MalformedURLException {
-        return new URL(FeatureAdapter.getSetting(METADATA_API_SETTING, METADATA_API_URL)
-                .replace(API_KEY_PLACEHOLDER, FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY))
-                .replace(API_KEY_LAYER, this.layer));
+        try {
+            return new URI(FeatureAdapter.getSetting(METADATA_API_SETTING, METADATA_API_URL)
+                    .replace(API_KEY_PLACEHOLDER, FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY))
+                    .replace(API_KEY_LAYER, this.layer)).toURL();
+        } catch (URISyntaxException e) {
+            MalformedURLException malformedURLException = new MalformedURLException(e.getMessage());
+            malformedURLException.initCause(e);
+            throw malformedURLException;
+        }
     }
 
     protected List<Attribution> parseAttributionText(InputSource xml) throws IOException {
@@ -232,11 +240,11 @@ public class BingAerialTileSource extends TMSTileSource {
                 }
                 if (brandLogoUri != null && !brandLogoUri.isEmpty()) {
                     LOG.log(Level.FINE, "Reading Bing logo from {0}", brandLogoUri);
-                    return FeatureAdapter.readImage(new URL(brandLogoUri));
+                    return FeatureAdapter.readImage(new URI(brandLogoUri));
                 }
             }
-        } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Error while retrieving Bing logo: "+e.getMessage());
+        } catch (URISyntaxException | IOException e) {
+            LOG.log(Level.SEVERE, String.format("Error while retrieving Bing logo: %s", e.getMessage()));
         }
         return null;
     }
@@ -266,7 +274,7 @@ public class BingAerialTileSource extends TMSTileSource {
                     LOG.log(Level.FINE, "Successfully loaded Bing attribution data.");
                     return r;
                 } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, "Could not connect to Bing API. Will retry in " + waitTimeSec + " seconds.");
+                    LOG.log(Level.SEVERE, String.format("Could not connect to Bing API. Will retry in %d seconds.", waitTimeSec));
                     LOG.log(Level.FINE, ex.getMessage(), ex);
                     Thread.sleep(TimeUnit.SECONDS.toMillis(waitTimeSec));
                     waitTimeSec *= 2;
@@ -275,6 +283,10 @@ public class BingAerialTileSource extends TMSTileSource {
         };
     }
 
+    /**
+     * Get the attribution data that is currently loaded
+     * @return The list of {@link Attribution} data or {@code null}, if no attribution data has been loaded yet.
+     */
     protected List<Attribution> getAttribution() {
         if (attributions == null) {
             // see http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
@@ -286,14 +298,16 @@ public class BingAerialTileSource extends TMSTileSource {
                 }
             }
         }
-        try {
-            return attributions.get();
-        } catch (ExecutionException ex) {
-            throw new JMapViewerRuntimeException(ex);
-        } catch (InterruptedException ign) {
-            LOG.log(Level.SEVERE, "InterruptedException: {0}", ign.getMessage());
-            LOG.log(Level.FINE, ign.getMessage(), ign);
-            Thread.currentThread().interrupt();
+        if (attributions.isDone()) {
+            try {
+                return attributions.get();
+            } catch (ExecutionException ex) {
+                throw new JMapViewerRuntimeException(ex);
+            } catch (InterruptedException ign) {
+                LOG.log(Level.SEVERE, "InterruptedException: {0}", ign.getMessage());
+                LOG.log(Level.FINE, ign.getMessage(), ign);
+                Thread.currentThread().interrupt();
+            }
         }
         return null;
     }

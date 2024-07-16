@@ -216,6 +216,17 @@ public final class FeatureAdapter {
     }
 
     /**
+     * Reads an image using the current {@link ImageAdapter}.
+     * @param url image URI to read
+     * @return a <code>BufferedImage</code> containing the decoded contents of the input, or <code>null</code>.
+     * @throws java.net.MalformedURLException if the URI could not be converted to a URL
+     * @throws IOException if an error occurs during reading.
+     */
+    public static BufferedImage readImage(URI url) throws IOException {
+        return imageAdapter.read(url.toURL(), false, false);
+    }
+
+    /**
      * Translates a text using the current {@link TranslationAdapter}.
      * @param text the text to translate.
      * Must be a string literal. (No constants or local vars.)
