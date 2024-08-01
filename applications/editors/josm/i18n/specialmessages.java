@@ -13,7 +13,7 @@
 /* Java message loading audio data */ tr("could not get audio input stream from input URL");
 /* Java message loading audio data */ tr("Audio Device Unavailable");
 /* OSM server message */ tr("You must make your edits public to upload new data");
-/* OSM server message */ tr("<h2>This website is under heavy load (queue full)</h2><p>We're sorry, too many people are accessing this website at the same time. We're working on this problem. Please try again later.</p>");
+/* OSM server message */ tr("<h2>This website is under heavy load (queue full)</h2><p>We''re sorry, too many people are accessing this website at the same time. We''re working on this problem. Please try again later.</p>");
 /* Nominatim search place type */ tr("town");
 /* Landuse type used in multipolygons */ trc("landuse", "forest");
 /* Landuse type used in multipolygons */ trc("landuse", "meadow");
