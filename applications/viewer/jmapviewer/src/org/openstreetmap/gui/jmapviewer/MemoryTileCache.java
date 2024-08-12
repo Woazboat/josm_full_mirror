@@ -1,10 +1,12 @@
 // License: GPL. For details, see Readme.txt file.
 package org.openstreetmap.gui.jmapviewer;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.openstreetmap.gui.jmapviewer.interfaces.TileCache;
 import org.openstreetmap.gui.jmapviewer.interfaces.TileSource;
@@ -101,6 +103,13 @@ public class MemoryTileCache implements TileCache {
     public synchronized void clear() {
         hash.clear();
         lruTiles.clear();
+    }
+
+    @Override
+    public synchronized void clearErrorTiles() {
+        Collection<CacheEntry> toRemove = hash.values().stream().filter(cacheEntry -> cacheEntry.tile.hasError()).collect(Collectors.toList());
+        hash.values().removeAll(toRemove);
+        toRemove.forEach(lruTiles::removeEntry);
     }
 
     @Override

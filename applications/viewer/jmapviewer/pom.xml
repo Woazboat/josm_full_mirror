@@ -5,7 +5,7 @@
 
     <groupId>org.openstreetmap.jmapviewer</groupId>
     <artifactId>jmapviewer</artifactId>
-    <version>2.20</version>
+    <version>2.22-SNAPSHOT</version>
 
     <name>JMapViewer</name>
     <url>https://josm.openstreetmap.de/browser/osm/applications/viewer/jmapviewer</url>

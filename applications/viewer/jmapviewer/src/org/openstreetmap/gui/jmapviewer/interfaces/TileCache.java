@@ -49,6 +49,14 @@ public interface TileCache {
     void clear();
 
     /**
+     * Removes error tiles from memory.
+     * This is implementation specific; the default calls {@link #clear()}.
+     */
+    default void clearErrorTiles() {
+        this.clear();
+    }
+
+    /**
      * Size of the cache.
      * @return maximum number of tiles in cache
      */
