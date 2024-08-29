@@ -273,7 +273,7 @@ public class BingAerialTileSource extends TMSTileSource {
                     List<Attribution> r = parseAttributionText(xml);
                     LOG.log(Level.FINE, "Successfully loaded Bing attribution data.");
                     return r;
-                } catch (IOException ex) {
+                } catch (IllegalArgumentException | IOException ex) {
                     LOG.log(Level.SEVERE, String.format("Could not connect to Bing API. Will retry in %d seconds.", waitTimeSec));
                     LOG.log(Level.FINE, ex.getMessage(), ex);
                     Thread.sleep(TimeUnit.SECONDS.toMillis(waitTimeSec));
