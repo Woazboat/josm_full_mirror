@@ -1,8 +1,10 @@
 #! /usr/bin/perl -w
 
-my $oldsvn = 0; # before 1.7
+my $oldsvn = 0;
 my $maxlength = 0;
 my @names = glob "*.jar";
+
+my %ignored = map {$_ => 1} split("\n", `svn propget svn:ignore .`);
 
 foreach my $plugin (@names)
 {
@@ -14,6 +16,7 @@ system "svn -q export -r BASE . getrev" if !$oldsvn;
 foreach my $plugin (@names)
 {
   next if $plugin =~ /-(javadoc|sources)\.jar$/;
+  next if $ignored{$plugin};
   my $date = "";
   my $version = "";
   my $mversion = "";
