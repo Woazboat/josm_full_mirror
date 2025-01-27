@@ -43,7 +43,7 @@ public abstract class AbstractTMSTileSource extends AbstractTileSource {
         if (baseUrl != null && baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length()-1);
         }
-        this.id = info.getUrl();
+        this.id = info.getId();
         this.noTileHeaders = info.getNoTileHeaders();
         this.noTileChecksums = info.getNoTileChecksums();
         this.metadataHeaders = info.getMetadataHeaders();

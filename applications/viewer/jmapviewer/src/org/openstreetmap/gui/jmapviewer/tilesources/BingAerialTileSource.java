@@ -80,7 +80,7 @@ public class BingAerialTileSource extends TMSTileSource {
      * Constructs a new {@code BingAerialTileSource}.
      */
     public BingAerialTileSource() {
-        super(new TileSourceInfo("Bing", null, null));
+        super(new TileSourceInfo("Bing", null, "Bing"));
         minZoom = 1;
     }
 
@@ -131,13 +131,39 @@ public class BingAerialTileSource extends TMSTileSource {
     protected URL getAttributionUrl() throws MalformedURLException {
         try {
             return new URI(FeatureAdapter.getSetting(METADATA_API_SETTING, METADATA_API_URL)
-                    .replace(API_KEY_PLACEHOLDER, FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY))
+                    .replace(API_KEY_PLACEHOLDER, getKey())
                     .replace(API_KEY_LAYER, this.layer)).toURL();
         } catch (URISyntaxException e) {
             MalformedURLException malformedURLException = new MalformedURLException(e.getMessage());
             malformedURLException.initCause(e);
             throw malformedURLException;
         }
+    }
+
+    /**
+     * Get the API key for Bing imagery
+     * Order of preference is as follows:
+     * <ol>
+     *     <li>Custom API key provided by {@link FeatureAdapter#getSetting(String, String)} via {@link #API_KEY_SETTING}</li>
+     *     <li>API key provided by {@link FeatureAdapter#retrieveApiKey(String)}</li>
+     *     <li>The hardcoded API key. This should not be used whenever possible.</li>
+     * </ol>
+     * @return The API key to use
+     */
+    private String getKey() {
+        // Preference order for key
+        // 1. Custom API key
+        // 2. Remote API key
+        // 3. Hardcoded API key
+        String key = FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY);
+        if (API_KEY.equals(key)) { // If the API key has not been customized, we try to retrieve the API key
+            try {
+                key = FeatureAdapter.retrieveApiKey(this.getId());
+            } catch (IOException ioException) {
+                FeatureAdapter.getLogger(this.getClass()).log(Level.WARNING, "Failed to retrieve api key", ioException);
+            }
+        }
+        return key;
     }
 
     protected List<Attribution> parseAttributionText(InputSource xml) throws IOException {
