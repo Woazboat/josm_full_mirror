@@ -13,7 +13,7 @@
     <property name="jacoco.inclbootstrapclasses" value="false" />
     <property name="jacoco.inclnolocationclasses" value="false" />
     <!-- For Java specific stuff by version -->
-    <condition property="isJava9"><matches string="${ant.java.version}" pattern="(1.)?(9|1[0-9])" /></condition>
+    <condition property="isJava9"><matches string="${ant.java.version}" pattern="(1.)?(9|[2-9][0-9])" /></condition>
     <condition property="isJava23"><matches string="${ant.java.version}" pattern="2[3-9]|[3-9][0-9]" /></condition>
     <!-- Disable jacoco 0.8.11 on Java 23+, see https://www.jacoco.org/jacoco/trunk/doc/changes.html for latest supported version -->
     <condition property="coverageByDefault">
