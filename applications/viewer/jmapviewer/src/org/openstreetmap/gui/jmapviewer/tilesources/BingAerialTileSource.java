@@ -158,7 +158,9 @@ public class BingAerialTileSource extends TMSTileSource {
         String key = FeatureAdapter.getSetting(API_KEY_SETTING, API_KEY);
         if (API_KEY.equals(key)) { // If the API key has not been customized, we try to retrieve the API key
             try {
-                key = FeatureAdapter.retrieveApiKey(this.getId());
+                String rkey = FeatureAdapter.retrieveApiKey(this.getId());
+                if (rkey != null)
+                    key = rkey;
             } catch (IOException ioException) {
                 FeatureAdapter.getLogger(this.getClass()).log(Level.WARNING, "Failed to retrieve api key", ioException);
             }
