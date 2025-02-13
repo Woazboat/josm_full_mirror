@@ -205,6 +205,12 @@
         </exec>
         <antcall target="build"/>
     </target>
+    <target name="updatetest">
+        <exec executable="perl" failonerror="true">
+            <arg line="launchpad.pl bzronly"/>
+        </exec>
+        <antcall target="test"/>
+    </target>
     <target name="updatecore">
         <exec executable="perl" failonerror="true">
             <arg line="launchpad.pl bzronly"/>
