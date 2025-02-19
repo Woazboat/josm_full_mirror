@@ -455,13 +455,21 @@ sub main
   my %data = loadfiles(\%lang, $use, @po);
 
   my @clang;
+  my %oldlang = map {$_ => 1} glob("${basename}*.lang");
   foreach my $la (sort keys %lang)
   {
     $la =~ s/\@/-/;
     push(@clang, "${basename}$la.lang");
+    delete $oldlang{"${basename}$la.lang"};
   }
   push(@clang, "${basename}en.lang");
+  delete $oldlang{"${basename}en.lang"};
   die "There have been warning. No output.\n" if $waswarn;
+  for my $old (sort keys %oldlang)
+  {
+    print("Remove old file $old.\n");
+    unlink($old);
+  }
 
   createlang(\%data, ($use ? keys %{$use} : keys %data), @clang);
 }
